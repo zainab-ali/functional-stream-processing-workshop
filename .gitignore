@@ -1,0 +1,14 @@
+*.html
+~
+*#
+compiled/
+
+.vscode/
+.bsp/
+.scala-build/
+.metals/
+.bloop/
+.js/
+.jvm/
+.native/
+target/
