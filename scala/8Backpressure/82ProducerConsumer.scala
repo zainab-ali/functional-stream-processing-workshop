@@ -1,6 +1,6 @@
 import fs2.*
 import fs2.concurrent.*
-import cats.effect.{Trace => _, *}
+import cats.effect.*
 import cats.effect.std.Queue
 import scala.concurrent.duration.*
 
@@ -18,7 +18,7 @@ object Example82 extends IOApp.Simple {
     .metered(2.seconds)
 
   def run: IO[Unit] = {
-    Queue.bounded[IO, String](10).flatMap { queue =>
+    Queue.bounded[IO, String](3).flatMap { queue =>
       producer(queue).merge(consumer(queue)).compile.drain
     }
   }

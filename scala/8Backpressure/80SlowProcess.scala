@@ -10,6 +10,9 @@ object Example80 extends IOApp.Simple {
     IO.sleep(5.seconds) >> IO.println(s"Did you say $text?")
 
   def run: IO[Unit] = {
-    fs2.io.stdinUtf8[IO](10).foreach(slowEcho).compile.drain
+    fs2.io.stdin[IO](1024)
+      .split(_ == '\n'.toByte)
+      .map(chk => String(chk.toArray))
+      .foreach(slowEcho).compile.drain
   }
 }
