@@ -14,7 +14,7 @@ class Exercise0 extends CatsEffectSuite {
     assertEquals(result, List(0, 1))
   }
 
-  test("get the fifth to seventh number") {
+  test("get the seventh to the ninth number") {
     val result: List[Int] = ???
     assertEquals(result, List(6, 7, 8))
   }
@@ -26,10 +26,10 @@ class Exercise0 extends CatsEffectSuite {
 
   test("get the 1000th number") {
     val result: Int = ???
-    assertEquals(result, 10001)
+    assertEquals(result, 1000)
   }
 
-  test("get the sum of the first 10 numbers") {
+  test("get the sum of the first 11 numbers") {
     val result = ???
     assertEquals(result, 45)
   }

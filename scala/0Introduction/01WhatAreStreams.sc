@@ -1,5 +1,5 @@
 // Run this in the repl with:
-// scala-cli repl --dep "co.fs2::fs2-core:3.9.4" --scala 3.4.0
+// scala-cli repl project.scala
 
 import fs2.*
 
@@ -24,6 +24,3 @@ val numbersListFromStream = numbers.toList
 // Some trivial streams
 // val emptyStream = Stream.empty.repeat
 // println(s"This never terminates: ${emptyStream.compile.count}")
-
-val ascii = numbers.drop(70).take(4).repeat.take(7).map(_.toChar).compile.toList
-println(s"The characters are ${ascii}")

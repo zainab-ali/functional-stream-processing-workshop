@@ -14,5 +14,6 @@ object Example23 extends AquascapeApp.Simple {
       .compile
       .drain
       .compileStage("compile.drain")
+      .attempt.void
   }
 }

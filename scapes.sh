@@ -9,5 +9,5 @@ for FILE in $FILES
 do
     scala-cli run ../project.scala ../"$FILE"
 done
-popd scapes || exit
+popd || exit
 	    

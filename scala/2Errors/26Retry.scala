@@ -2,7 +2,7 @@ import fs2.*
 import cats.effect.{Trace => _, *}
 import cats.syntax.all.*
 
-/* We can "retry" a stream by recurring within the handleErrorWith operator. This should be used with caution. */
+/* We can "retry" a stream by recursing within the handleErrorWith operator. This should be used with caution. */
 object Example26 extends IOApp.Simple {
 
   /* Raise an error when the number is 2, otherwise return the number */

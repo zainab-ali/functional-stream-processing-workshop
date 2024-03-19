@@ -1,5 +1,5 @@
 // Run this in the repl with:
-// scala-cli repl --dep "co.fs2::fs2-core:3.9.4" --scala 3.4.0
+// scala-cli repl project.scala
 
 import fs2.*
 
