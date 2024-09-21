@@ -3,7 +3,9 @@ import cats.effect.*
 import aquascape.*
 import cats.syntax.all.*
 
-object Example25 extends AquascapeApp.Simple.File("handleErrorWith") {
+object Example25 extends AquascapeApp {
+
+  def name: String = "handleErrorWith"
   def error(x: Int): IO[Int] = IO.raiseError(new Error("!")).whenA(x == 2).as(x)
 
   def stream(using Scape[IO]) = {

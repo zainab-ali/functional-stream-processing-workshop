@@ -2,7 +2,8 @@ import fs2.*
 import cats.effect.*
 import aquascape.*
 
-object BasicScape extends AquascapeApp.Simple {
+object BasicScape extends AquascapeApp {
+  def name: String = "basicScape"
   def stream(using Scape[IO]) = {
     Stream(1, 2, 3)
       .stage("Source")

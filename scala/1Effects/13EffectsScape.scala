@@ -2,8 +2,9 @@ import fs2.*
 import cats.effect.*
 import aquascape.*
 
-object Example13 extends AquascapeApp.Simple.File("effects") {
+object Example13 extends AquascapeApp {
 
+  def name: String = "effects"
   def print(x: Int): IO[String] = IO.println(s"Printing $x").as(x.toString)
 
   def stream(using Scape[IO]) = {

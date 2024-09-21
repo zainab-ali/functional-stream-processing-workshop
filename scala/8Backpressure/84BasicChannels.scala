@@ -14,8 +14,8 @@ object Example84 extends IOApp.Simple {
 
   def consumer(chan: Channel[IO, String]) =
     chan.stream
-    .evalMap(text => IO.println(s"Processing $text"))
-    .metered(2.seconds)
+      .evalMap(text => IO.println(s"Processing $text"))
+      .metered(2.seconds)
 
   def run: IO[Unit] = {
     Channel.bounded[IO, String](1).flatMap { channel =>

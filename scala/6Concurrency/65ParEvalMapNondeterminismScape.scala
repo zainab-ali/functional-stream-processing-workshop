@@ -4,7 +4,9 @@ import aquascape.*
 import scala.concurrent.duration.*
 
 /* We take two elements, but three effects are evaluated. */
-object Example65 extends AquascapeApp.Simple.File("parEvalMap-nondeterminism") {
+object Example65 extends AquascapeApp {
+
+  def name: String = "parEvalMap-nondeterminism"
 
   def eval(time: Int, i: Long): IO[Long] = IO.println(
     s"Starting to process $i ($time seconds)"

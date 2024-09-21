@@ -13,17 +13,20 @@ object Example86 extends IOApp.Simple {
       .metered(1.second)
 
   def consumer(topic: Topic[IO, String], chanId: Int, time: FiniteDuration) =
-    topic.subscribe(0)
-    .evalMap(text => IO.println(s"${chanId}: Processing $text"))
-    .meteredStartImmediately(time)
+    topic
+      .subscribe(0)
+      .evalMap(text => IO.println(s"${chanId}: Processing $text"))
+      .meteredStartImmediately(time)
 
   def run: IO[Unit] = {
     Topic[IO, String].flatMap { topic =>
       producer(topic)
-      .merge(
-      consumer(topic, 1, 1.second)
-        .merge(consumer(topic, 2, 10.second)))
-        .compile.drain
+        .merge(
+          consumer(topic, 1, 1.second)
+            .merge(consumer(topic, 2, 10.second))
+        )
+        .compile
+        .drain
     }
   }
 }

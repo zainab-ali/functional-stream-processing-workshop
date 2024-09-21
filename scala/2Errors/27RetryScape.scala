@@ -4,7 +4,9 @@ import aquascape.*
 import cats.syntax.all.*
 
 /* An aquascape to demonstrate retry logic */
-object Example27 extends AquascapeApp.Simple.File("retry") {
+object Example27 extends AquascapeApp {
+
+  def name: String = "retry"
   def print(x: Int): IO[String] = IO.println(s"Printing $x").as(x.toString)
   def error(x: Int): IO[Int] = IO.raiseError(new Error("!")).whenA(x == 2).as(x)
 

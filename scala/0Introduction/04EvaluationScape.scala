@@ -3,7 +3,8 @@ import cats.effect.*
 import aquascape.*
 
 /* We can introduce more operators and draw a stage for each operator. */
-object Example04 extends AquascapeApp.Simple {
+object Example04 extends AquascapeApp {
+  def name: String = "evaluation-chaining"
   def stream(using Scape[IO]) = {
     Stream(1, 2, 3)
       .stage("Stream(1,2,3)")

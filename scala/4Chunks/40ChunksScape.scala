@@ -3,7 +3,9 @@ import cats.effect.*
 import aquascape.*
 
 /* fs2 operates on streams in chunks. */
-object Example40 extends AquascapeApp.Simple.File("chunks") {
+object Example40 extends AquascapeApp {
+
+  def name: String = "chunks"
 
   def stream(using Scape[IO]) = {
     /* Tell aquascape to draw chunks */

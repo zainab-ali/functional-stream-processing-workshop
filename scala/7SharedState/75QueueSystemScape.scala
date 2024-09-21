@@ -4,7 +4,8 @@ import aquascape.*
 import scala.concurrent.duration.*
 import cats.effect.std.Queue
 
-object Example75 extends AquascapeApp.Simple.File("queue-system") {
+object Example75 extends AquascapeApp {
+  def name: String = "queue-system"
 
   def stream(using Scape[IO]) =
     Queue.bounded[IO, Int](2).flatMap { queue =>

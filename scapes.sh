@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # This script is used to regenerate all images.
-FILES=$(rg -l "AquascapeApp.Simple.File" scala)
+FILES=$(rg -l "AquascapeApp" scala)
 
 mkdir -p scapes
 pushd scapes || exit

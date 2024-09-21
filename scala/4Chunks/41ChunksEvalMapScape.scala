@@ -3,7 +3,8 @@ import cats.effect.*
 import aquascape.*
 
 /* The chunks outputted by evalMap have a single element only. This ensures that effects are not evaluated multiple times. */
-object Example41 extends AquascapeApp.Simple.File("chunks-evalMap") {
+object Example41 extends AquascapeApp {
+  def name: String = "chunks-evalMap"
 
   def print(x: Int): IO[String] = IO.println(s"Printing $x").as(x.toString)
 

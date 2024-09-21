@@ -3,8 +3,9 @@ import cats.effect.*
 import aquascape.*
 import scala.concurrent.duration.*
 
-object Example62 extends AquascapeApp.Simple.File("parEvalMap") {
+object Example62 extends AquascapeApp {
 
+  def name: String = "parEvalMap"
   def eval(time: Int, i: Long): IO[Long] = IO.println(
     s"Starting to process $i ($time seconds)"
   ) >> IO.sleep(time.seconds) >> (IO.println(s"Processed $i")).as(i)

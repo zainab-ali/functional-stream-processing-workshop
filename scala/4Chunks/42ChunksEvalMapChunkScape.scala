@@ -3,7 +3,8 @@ import cats.effect.*
 import aquascape.*
 
 /* evalMapChunk preserves chunks, but at the cost of executing more effects than expressed. */
-object Example42 extends AquascapeApp.Simple.File("chunks-evalMapChunk") {
+object Example42 extends AquascapeApp {
+  def name: String = "chunks-evalMapChunk"
 
   def print(x: Int): IO[String] = IO.println(s"Printing $x").as(x.toString)
 
