@@ -4,7 +4,7 @@ import aquascape.*
 
 /* We can introduce more operators and draw a stage for each operator. */
 object Example05 extends AquascapeApp {
-  def name: String = "evaluation-chaining"
+  def name: String = "aquascape"
   def stream(using Scape[IO]) = {
     Stream(1, 2, 3)
       .stage("Stream(1,2,3)")
