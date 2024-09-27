@@ -1,41 +1,51 @@
 import fs2.*
+
+val sentenceData: Stream[Pure, String] =
+  Stream("This is a test sentence").flatMap(sentence =>
+    Stream.emits(sentence.split(" "))
+  )
+
+sentenceData.compile.toList
+
 import cats.effect.*
-
 import scala.concurrent.duration.*
+def chapterData(n: Int): Stream[IO, String] =
+  Stream
+    .sleep[IO](1.second)
+    .flatMap(_ => sentenceData.repeatN(4L))
+    .map(word => s"ch$n: $word")
+
+val firstSixWordsOfChapterTwo = chapterData(2).take(6).compile.toList
+
 import cats.effect.unsafe.implicits.global
+firstSixWordsOfChapterTwo.unsafeRunSync()
 
-def chapterTestData(n: Int) =
-  Stream("This", "is", "chapter", n.toString).repeatN(4L)
+def countWords(in: Stream[IO, String]): Stream[IO, Int] =
+  in.map(_ => 1).fold1(_ + _)
 
-chapterTestData(3).take(5).compile.toList
+def countWordsSequentially(
+    chapterOne: Stream[IO, String],
+    chapterTwo: Stream[IO, String]
+): IO[Int] = (countWords(chapterOne) ++ countWords(chapterTwo))
+  .fold1(_ + _)
+  .compile
+  .last
+  .map(_.getOrElse(0))
 
-val bookTestData = Stream.range(0, 3).map(chapterTestData)
+val (timeToCompute, totalCount) =
+  countWordsSequentially(chapterData(1), chapterData(2)).timed.unsafeRunSync()
+println(s"Counting words took ${timeToCompute.toMillis}ms")
 
-def countWords: Pipe[IO, String, Int] = in =>
-  Stream.sleep[IO](1.second).flatMap(_ => in.map(_ => 1).fold1(_ + _))
+def countWordsFanIn(
+    chapterOne: Stream[IO, String],
+    chapterTwo: Stream[IO, String]
+): IO[Int] = countWords(chapterOne)
+  .merge(countWords(chapterTwo))
+  .fold1(_ + _)
+  .compile
+  .last
+  .map(_.getOrElse(0))
 
-def countWordsInBook(book: Stream[Pure, Stream[IO, String]]): IO[Int] =
-  book
-    .flatMap(chapter => chapter.through(countWords))
-    .fold1(_ + _)
-    .compile
-    .last
-    .map(_.getOrElse(0))
-
-val (countWordsTime, _) = countWordsInBook(bookTestData).timed.unsafeRunSync()
-println(s"Counting words took ${countWordsTime.toSeconds} seconds")
-
-def countWordsInBookAndFanIn(book: Stream[IO, Stream[IO, String]]): IO[Int] =
-  book
-    .map(_.through(countWords))
-    .parJoinUnbounded
-    .fold1(_ + _)
-    .compile
-    .last
-    .map(_.getOrElse(0))
-
-val (countWordsFanInTime, _) =
-  countWordsInBookAndFanIn(bookTestData).timed.unsafeRunSync()
-println(
-  s"Counting words with a fan-in took ${countWordsFanInTime.toSeconds} seconds"
-)
+val (timeToComputeFanIn, totalCountFanIn) =
+  countWordsFanIn(chapterData(1), chapterData(2)).timed.unsafeRunSync()
+println(s"Counting words with fan-in took ${timeToComputeFanIn.toMillis}ms")
