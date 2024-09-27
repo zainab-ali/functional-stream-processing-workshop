@@ -5,7 +5,7 @@ import fs2.*
   *
   * Outcome: Predict the output of a stream built using these primitives.
   */
-class Exercise0 extends CatsEffectSuite {
+class Ex0WhatAreStreams extends CatsEffectSuite {
 
   val numbers: Stream[Pure, Int] = Stream.range(0, Int.MaxValue)
 
