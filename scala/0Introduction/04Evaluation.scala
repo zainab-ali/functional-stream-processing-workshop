@@ -9,7 +9,8 @@ object Example04 extends AquascapeApp {
     Stream(1, 2, 3)
       .stage("Source")
       .compile
-      .drain
-      .compileStage("compile.drain")
+      .toList
+      .compileStage("compile.toList")
+      .void
   }
 }

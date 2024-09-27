@@ -13,7 +13,8 @@ object Example05 extends AquascapeApp {
       .drop(1)
       .stage("drop(1)")
       .compile
-      .drain
-      .compileStage("compile.drain")
+      .toList
+      .compileStage("compile.toList")
+      .void
   }
 }
