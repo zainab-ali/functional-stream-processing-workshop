@@ -1,5 +1,13 @@
 import fs2.*
 
+import fs2.*
+import cats.effect.IO
+
+def fanOutAndIn[A, B](
+    input: Stream[IO, A],
+    fanFunction: A => Stream[IO, B]
+): Stream[IO, B] = input.map(fanFunction).parJoinUnbounded
+
 val sentenceData: Stream[Pure, String] =
   Stream("This is a test sentence").flatMap(sentence =>
     Stream.emits(sentence.split(" "))
@@ -9,54 +17,42 @@ sentenceData.compile.toList
 
 import cats.effect.*
 import scala.concurrent.duration.*
-def chapterData(n: Int): Stream[IO, String] =
+def bookData(title: String): Stream[IO, String] =
   Stream
     .sleep[IO](1.second)
     .flatMap(_ => sentenceData.repeatN(4L))
-    .map(word => s"ch$n: $word")
-
-val firstSixWordsOfChapterTwo = chapterData(2).take(6).compile.toList
+    .map(word => s"book$title: $word")
 
 import cats.effect.unsafe.implicits.global
-firstSixWordsOfChapterTwo.unsafeRunSync()
+val firstSixWordsOfLittleDorritIO =
+  bookData("little-dorrit").take(6).compile.toList
+val (firstSixWordsTime, firstSixWordsOfLittleDorrit) =
+  firstSixWordsOfLittleDorritIO.timed.unsafeRunSync()
 
-def countWords(in: Stream[IO, String]): Stream[IO, Int] =
-  in.map(_ => 1).fold1(_ + _)
+def countWords(book: Stream[IO, String]): Stream[IO, Long] =
+  book.map(_ => 1L).fold1(_ + _)
 
-def countWordsSequentially(
-    chapterOne: Stream[IO, String],
-    chapterTwo: Stream[IO, String]
-): IO[Int] = (countWords(chapterOne) ++ countWords(chapterTwo))
-  .fold1(_ + _)
-  .compile
-  .last
-  .map(_.getOrElse(0))
+def countWordsInBooks(books: Stream[IO, Stream[IO, String]]): Stream[IO, Long] =
+  books.map(book => countWords(book)).parJoinUnbounded.fold1(_ + _)
 
-val (timeToCompute, totalCount) =
-  countWordsSequentially(chapterData(1), chapterData(2)).timed.unsafeRunSync()
-println(s"Counting words took ${timeToCompute.toMillis}ms")
+val (timeToCompute, totalCount) = countWordsInBooks(
+  Stream(bookData("little-dorrit"), bookData("hard-times"))
+).compile.last.timed.unsafeRunSync()
+timeToCompute.toMillis
+println(s"Counting words with fan-in took ${timeToCompute.toMillis}ms")
 
-def countWordsFanIn(
-    chapterOne: Stream[IO, String],
-    chapterTwo: Stream[IO, String]
-): IO[Int] = countWords(chapterOne)
-  .merge(countWords(chapterTwo))
-  .fold1(_ + _)
-  .compile
-  .last
-  .map(_.getOrElse(0))
-
-val (timeToComputeFanIn, totalCountFanIn) =
-  countWordsFanIn(chapterData(1), chapterData(2)).timed.unsafeRunSync()
-println(s"Counting words with fan-in took ${timeToComputeFanIn.toMillis}ms")
-
-def fanOutAndIn(chapters: Stream[IO, Stream[IO, String]]): IO[Int] =
-  chapters
-    .map(countWords)
-    .parJoinUnbounded
+def countWordsInBooksSequentially(
+    books: Stream[IO, Stream[IO, String]]
+): Stream[IO, Long] =
+  books
+    .flatMap { book => countWords(book) }
     .fold1(_ + _)
-    .compile
-    .last
-    .map(_.getOrElse(0))
 
-val bookData = Stream.range(1, 10).map(chapterData)
+val (timeToComputeSequentially, totalCountSequential) =
+  countWordsInBooksSequentially(
+    Stream(bookData("little-dorrit"), bookData("hard-times"))
+  ).compile.last.timed.unsafeRunSync()
+
+println(
+  s"Counting words sequentially took ${timeToComputeSequentially.toMillis}ms"
+)
