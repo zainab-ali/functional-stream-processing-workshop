@@ -3,9 +3,17 @@
 
 import fs2.*
 
-val numbers = Stream.range(0, Int.MaxValue)
+val helloWords = Stream("Hello", "Cádiz")
+val goodbyeWords = Stream("Goodbye", "London")
 
-val zipped = numbers.zip(numbers.map(_ + 1)).take(3).compile.toList
-val appended = (numbers.take(3) ++ numbers.take(4)).compile.toList
+(helloWords ++ goodbyeWords).compile.toList
 
-val merged = numbers.merge(numbers.map(_ + 1)).take(3).compile.toList
+helloWords.zip(goodbyeWords).compile.toList
+
+helloWords.interleave(goodbyeWords).compile.toList
+helloWords
+  .flatMap(helloWord =>
+    goodbyeWords.map(goodbyeWord => s"$helloWord-$goodbyeWord")
+  )
+  .compile
+  .toList

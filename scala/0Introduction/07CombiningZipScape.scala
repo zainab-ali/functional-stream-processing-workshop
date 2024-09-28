@@ -2,7 +2,7 @@ import fs2.*
 import cats.effect.*
 import aquascape.*
 
-object Example51 extends AquascapeApp {
+object Example07 extends AquascapeApp {
 
   def name: String = "combining-zip"
   def stream(using Scape[IO]) = {
