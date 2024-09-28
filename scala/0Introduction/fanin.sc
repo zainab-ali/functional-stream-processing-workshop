@@ -49,3 +49,14 @@ def countWordsFanIn(
 val (timeToComputeFanIn, totalCountFanIn) =
   countWordsFanIn(chapterData(1), chapterData(2)).timed.unsafeRunSync()
 println(s"Counting words with fan-in took ${timeToComputeFanIn.toMillis}ms")
+
+def fanOutAndIn(chapters: Stream[IO, Stream[IO, String]]): IO[Int] =
+  chapters
+    .map(countWords)
+    .parJoinUnbounded
+    .fold1(_ + _)
+    .compile
+    .last
+    .map(_.getOrElse(0))
+
+val bookData = Stream.range(1, 10).map(chapterData)
