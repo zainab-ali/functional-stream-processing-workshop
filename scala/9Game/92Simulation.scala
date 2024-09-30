@@ -9,7 +9,7 @@ import doodle.interact.*
 import doodle.interact.syntax.all.*
 import doodle.core.*
 
-object Example92 extends IOApp.Simple {
+object Example92 extends GameApp[Int, Unit] {
   val game = new Game[Int, Unit] {
     def init: Int = 1
     def render(state: Int): Picture[Unit] =
@@ -25,6 +25,4 @@ object Example92 extends IOApp.Simple {
         .metered(10.millis)
         .drain
   }
-
-  def run: IO[Unit] = game.run
 }

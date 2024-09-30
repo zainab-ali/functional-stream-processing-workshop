@@ -13,7 +13,8 @@ import doodle.core.font.Font
 import doodle.core.font.FontFamily
 import cats.effect.std.Queue
 
-object Example96 extends IOApp.Simple {
+object Example96
+    extends GameAppWithErrorAndLoggingAndMetrics[Example96.GameState, Example96.Command] {
 
   case class Position(x: Int, y: Int)
   case class Person(name: String, position: Position)
@@ -100,9 +101,9 @@ object Example96 extends IOApp.Simple {
                   .exec(stateRef.update(GameState.storeFruit(_, fruit)))
               }
           }
-          .handleErrorWith { case err =>
-            Stream.exec(IO.println(s"Got error ${err.getMessage}"))
-          }
+        // .handleErrorWith { case err =>
+        //   Stream.exec(IO.println(s"Got error ${err.getMessage}"))
+        // }
       }
     }
 
@@ -125,7 +126,7 @@ object Example96 extends IOApp.Simple {
     }
   }
 
-  def run: IO[Unit] = Queue
+  def game: IO[Game[GameState, Command]] = Queue
     .unbounded[IO, String]
     .flatMap { queue =>
       val game = makeGame(queue)
@@ -136,5 +137,5 @@ object Example96 extends IOApp.Simple {
         .drain
         .as(game)
     }
-    .flatMap(_.run)
+
 }

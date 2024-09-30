@@ -1,3 +1,4 @@
+import cats.effect.*
 import fs2.*
 import cats.effect.*
 import doodle.java2d.*
@@ -8,14 +9,12 @@ import doodle.interact.*
 import doodle.interact.syntax.all.*
 import doodle.core.*
 
-trait Game[S, C] {
-  def init: S
-  def input(text: String): Option[C]
-  def action(command: C, state: Ref[IO, S]): Stream[IO, Nothing]
-  def render(state: S): Picture[Unit]
-  def simulation(ref: Ref[IO, S]): Stream[IO, Nothing]
+trait GameAppWithError[S, C] extends IOApp.Simple {
 
-  def run: IO[Unit] = {
+  def game: IO[Game[S, C]]
+
+  def run: IO[Unit] = game.flatMap { game =>
+    import game.*
     val frame = Frame.default.withSize(600, 600).withBackground(Color.paleGreen)
     SignallingRef.of[IO, S](init).flatMap { stateSignal =>
       val renderLoop = stateSignal.continuous
@@ -26,7 +25,11 @@ trait Game[S, C] {
         .stdinUtf8[IO](1024)
         .map(_.trim)
         .mapFilter(input)
-        .map(action(_, stateSignal))
+        .map(input =>
+          action(input, stateSignal).adaptError { case e =>
+            enrichError(input)(e)
+          }
+        )
         .parJoinUnbounded
       renderLoop
         .concurrently(actions)
@@ -34,4 +37,11 @@ trait Game[S, C] {
         .animateToIO(frame)
     }
   }
+
+  private def enrichError(input: C)(error: Throwable): Throwable = new GameAppWithError.ActionError(input, ???, error)
+}
+
+object GameAppWithError {
+  final class ActionError[S, C](input: C, state: S, error: Throwable)
+      extends Exception(s"Error occurred in action for input $input and state $state.", error)
 }
