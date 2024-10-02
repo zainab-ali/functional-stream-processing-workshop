@@ -13,7 +13,7 @@ class Ex4Bracket extends CatsEffectSuite {
 
   // Record the time taken to evaluate a stream.
   // Hint: Call cats.effect.Clock[IO].realTime to get the time
-  def timed[A](recorder: Recorder)(in: Stream[IO, A]): Stream[IO, A] =
+  def timed[A](recorder: Recorder)(in: Stream[IO, A]): Stream[IO, A] = ???
 
   test("Time a stream") {
     val result = Recorder.run { recorder =>
