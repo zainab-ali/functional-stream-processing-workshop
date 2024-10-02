@@ -1,3 +1,10 @@
+package Part1Introduction
+
+
+final class Code5FanOutAndIn$_ {
+def args = Code5FanOutAndIn_sc.args$
+def scriptPath = """Part1Introduction/Code5FanOutAndIn.sc"""
+/*<script>*/
 import fs2.*
 
 import cats.effect.*
@@ -50,3 +57,27 @@ val (timeToComputeSequentially, totalCountSequential) =
   countWordsInBooksSequentially(
     Stream(bookData("little-dorrit"), bookData("hard-times"))
   ).compile.last.timed.unsafeRunSync()
+
+/*</script>*/ /*<generated>*//*</generated>*/
+}
+
+object Code5FanOutAndIn_sc {
+  private var args$opt0 = Option.empty[Array[String]]
+  def args$set(args: Array[String]): Unit = {
+    args$opt0 = Some(args)
+  }
+  def args$opt: Option[Array[String]] = args$opt0
+  def args$: Array[String] = args$opt.getOrElse {
+    sys.error("No arguments passed to this script")
+  }
+
+  lazy val script = new Code5FanOutAndIn$_
+
+  def main(args: Array[String]): Unit = {
+    args$set(args)
+    val _ = script.hashCode() // hashCode to clear scalac warning about pure expression in statement position
+  }
+}
+
+export Code5FanOutAndIn_sc.script as `Code5FanOutAndIn`
+

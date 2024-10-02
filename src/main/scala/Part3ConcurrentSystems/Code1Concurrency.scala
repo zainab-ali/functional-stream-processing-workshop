@@ -1,3 +1,10 @@
+package Part3ConcurrentSystems
+
+
+final class Code1Concurrency$_ {
+def args = Code1Concurrency_sc.args$
+def scriptPath = """Part3ConcurrentSystems/Code1Concurrency.sc"""
+/*<script>*/
 import fs2.*
 import scala.concurrent.duration.*
 import cats.effect.IO
@@ -90,3 +97,27 @@ time
   .compile
   .drain
   .unsafeRunSync()
+
+/*</script>*/ /*<generated>*//*</generated>*/
+}
+
+object Code1Concurrency_sc {
+  private var args$opt0 = Option.empty[Array[String]]
+  def args$set(args: Array[String]): Unit = {
+    args$opt0 = Some(args)
+  }
+  def args$opt: Option[Array[String]] = args$opt0
+  def args$: Array[String] = args$opt.getOrElse {
+    sys.error("No arguments passed to this script")
+  }
+
+  lazy val script = new Code1Concurrency$_
+
+  def main(args: Array[String]): Unit = {
+    args$set(args)
+    val _ = script.hashCode() // hashCode to clear scalac warning about pure expression in statement position
+  }
+}
+
+export Code1Concurrency_sc.script as `Code1Concurrency`
+

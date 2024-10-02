@@ -6,6 +6,9 @@ class: center, middle
 ## https://github.com/zainab-ali/functional-stream-processing-workshop/
 ### Part 1: Introduction
 
+Wifi: Landa24
+c4m4ron.
+
 ---
 class: middle
 # Agenda

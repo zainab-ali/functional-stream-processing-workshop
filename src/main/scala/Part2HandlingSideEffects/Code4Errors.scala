@@ -1,3 +1,10 @@
+package Part2HandlingSideEffects
+
+
+final class Code4Errors$_ {
+def args = Code4Errors_sc.args$
+def scriptPath = """Part2HandlingSideEffects/Code4Errors.sc"""
+/*<script>*/
 import fs2.*
 import cats.effect.IO
 import cats.effect.unsafe.implicits.global
@@ -47,3 +54,27 @@ numbers
   .compile
   .drain
   .unsafeRunSync()
+
+/*</script>*/ /*<generated>*//*</generated>*/
+}
+
+object Code4Errors_sc {
+  private var args$opt0 = Option.empty[Array[String]]
+  def args$set(args: Array[String]): Unit = {
+    args$opt0 = Some(args)
+  }
+  def args$opt: Option[Array[String]] = args$opt0
+  def args$: Array[String] = args$opt.getOrElse {
+    sys.error("No arguments passed to this script")
+  }
+
+  lazy val script = new Code4Errors$_
+
+  def main(args: Array[String]): Unit = {
+    args$set(args)
+    val _ = script.hashCode() // hashCode to clear scalac warning about pure expression in statement position
+  }
+}
+
+export Code4Errors_sc.script as `Code4Errors`
+

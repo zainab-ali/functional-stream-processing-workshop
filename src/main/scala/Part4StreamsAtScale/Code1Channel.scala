@@ -1,3 +1,10 @@
+package Part4StreamsAtScale
+
+
+final class Code1Channel$_ {
+def args = Code1Channel_sc.args$
+def scriptPath = """Part4StreamsAtScale/Code1Channel.sc"""
+/*<script>*/
 import fs2.*
 import fs2.concurrent.*
 import cats.effect.*
@@ -104,3 +111,27 @@ Channel
   }
   .timeout(20.second)
   .unsafeRunSync()
+
+/*</script>*/ /*<generated>*//*</generated>*/
+}
+
+object Code1Channel_sc {
+  private var args$opt0 = Option.empty[Array[String]]
+  def args$set(args: Array[String]): Unit = {
+    args$opt0 = Some(args)
+  }
+  def args$opt: Option[Array[String]] = args$opt0
+  def args$: Array[String] = args$opt.getOrElse {
+    sys.error("No arguments passed to this script")
+  }
+
+  lazy val script = new Code1Channel$_
+
+  def main(args: Array[String]): Unit = {
+    args$set(args)
+    val _ = script.hashCode() // hashCode to clear scalac warning about pure expression in statement position
+  }
+}
+
+export Code1Channel_sc.script as `Code1Channel`
+

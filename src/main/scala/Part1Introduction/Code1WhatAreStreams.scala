@@ -1,3 +1,10 @@
+package Part1Introduction
+
+
+final class Code1WhatAreStreams$_ {
+def args = Code1WhatAreStreams_sc.args$
+def scriptPath = """Part1Introduction/Code1WhatAreStreams.sc"""
+/*<script>*/
 import fs2.*
 
 /* Streams vs Lists */
@@ -21,3 +28,27 @@ val numbersListFromStream = numbers.toList
 // Some trivial streams
 // val emptyStream = Stream.empty.repeat
 // println(s"This never terminates: ${emptyStream.compile.count}")
+
+/*</script>*/ /*<generated>*//*</generated>*/
+}
+
+object Code1WhatAreStreams_sc {
+  private var args$opt0 = Option.empty[Array[String]]
+  def args$set(args: Array[String]): Unit = {
+    args$opt0 = Some(args)
+  }
+  def args$opt: Option[Array[String]] = args$opt0
+  def args$: Array[String] = args$opt.getOrElse {
+    sys.error("No arguments passed to this script")
+  }
+
+  lazy val script = new Code1WhatAreStreams$_
+
+  def main(args: Array[String]): Unit = {
+    args$set(args)
+    val _ = script.hashCode() // hashCode to clear scalac warning about pure expression in statement position
+  }
+}
+
+export Code1WhatAreStreams_sc.script as `Code1WhatAreStreams`
+
