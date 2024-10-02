@@ -1,6 +1,6 @@
 package Part1Introduction
 
-
+import cats.effect.unsafe.implicits.global
 final class Code5FanOutAndIn$_ {
 def args = Code5FanOutAndIn_sc.args$
 def scriptPath = """Part1Introduction/Code5FanOutAndIn.sc"""

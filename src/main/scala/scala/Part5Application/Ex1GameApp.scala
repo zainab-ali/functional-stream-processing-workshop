@@ -1,8 +1,8 @@
-import cats.effect.*
-trait GameApp[S, C] extends IOApp.Simple {
+// import cats.effect.*
+// trait GameApp[S, C] extends IOApp.Simple {
 
-  def game: IO[Game[S, C]]
+//   def game: IO[Game[S, C]]
 
-  // Implement this function
-  def run: IO[Unit] = ???
-}
+//   // Implement this function
+//   def run: IO[Unit] = ???
+// }
