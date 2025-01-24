@@ -4,11 +4,15 @@ import aquascape.*
 
 object Fig1Evaluation extends WorkshopAquascapeApp {
   def stream(using Scape[IO]): IO[Unit] = {
-    Stream(1, 2, 3)
-      .stage("Source")
+    Stream(1)
+      .stage("Stream(1)")
+      .repeat
+      .stage("repeat")
+      .take(2)
+      .stage("take(2)")
       .compile
-      .toList
-      .compileStage("compile.toList")
+      .count
+      .compileStage("compile.count")
       .void
   }
 }

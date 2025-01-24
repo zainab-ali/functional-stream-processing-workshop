@@ -5,14 +5,15 @@ import aquascape.*
 object Fig3CombiningZip extends WorkshopAquascapeApp {
   def stream(using Scape[IO]) = {
     Stream(1, 2, 3)
-      .stage("Left")
+      .stage("Stage(1, 2, 3)")
       .zip(
         Stream(4, 5, 6)
-          .stage("Right")
+          .stage("Stage(4, 5, 6)")
       )
-      .stage("zip")
+      .stage("zip(…)")
       .compile
-      .drain
-      .compileStage("compile.drain")
+      .count
+      .compileStage("compile.count")
+      .void
   }
 }

@@ -16,8 +16,3 @@ val numbersFromList = Stream.emits(List.range(0, Int.MaxValue))
 
 /* We can compile a stream to a list with the toList function */
 val numbersListFromStream = numbers.toList
-
-// Evaluation
-// Some trivial streams
-// val emptyStream = Stream.empty.repeat
-// println(s"This never terminates: ${emptyStream.compile.count}")
