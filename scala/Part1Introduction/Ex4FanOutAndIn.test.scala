@@ -16,9 +16,9 @@ class Ex4FanOutAndIn extends CatsEffectSuite {
     Stream
       .sleep[IO](1.second)
       .flatMap(_ => sentenceData.repeatN(4L))
-      .map(word => s"book$title: $word")
+      .map(word => s"$title: $word")
 
-  def countWordsInBooksWithParJoinUnbounded(
+  def countWordsInBooksWithFanOutAndIn(
       books: Stream[IO, Stream[IO, String]]
   ): Stream[IO, Long] = ???
 
@@ -32,7 +32,7 @@ class Ex4FanOutAndIn extends CatsEffectSuite {
   test("fan-out fan-in") {
     val books = Stream(bookData("little-dorrit"), bookData("hard-times"))
     val result: IO[(FiniteDuration, Option[Long])] =
-      countWordsInBooksWithParJoinUnbounded(books).compile.last.timed
+      countWordsInBooksWithFanOutAndIn(books).compile.last.timed
 
     assertIO(TestControl.executeEmbed(result), (1.seconds, Some(40L)))
   }
