@@ -1,26 +1,33 @@
+import cats.effect.*
 import fs2.*
-import cats.effect.{Trace => _, *}
 import fs2.io.file.Path
 
-// We should extend IOApp.Simple when using cats-effect IO
+// You must extend IOApp.Simple when using cats-effect IO.
 object Ex2WordCount extends IOApp.Simple {
 
+  // Use the files API to read UTF8 strings and split them into words
+  def readBook(title: Path): Stream[IO, String] = ???
+
   def countWords(book: Stream[IO, String]): Stream[IO, Long] =
-    book.map(_ => 1L).fold1(_ + _)
+    book.map(_ => 1L).foldMonoid
+
+  def countWordsInBook(title: Path): Stream[IO, Long] = countWords(
+    readBook(title)
+  )
 
   def countWordsInBooks(
-      books: Stream[IO, Stream[IO, String]]
+      titles: Stream[IO, Path]
   ): Stream[IO, Long] =
-    books.map(book => countWords(book)).parJoinUnbounded.fold1(_ + _)
-
-  // Use the files API to read UTF8 strings and split them into words
-  def readBook(path: Path): Stream[IO, String] = ???
+    titles
+      .map(title => countWordsInBook(title))
+      .parJoinUnbounded
+      .foldMonoid
 
   // Use the files API to list the contents of the data directory
-  def books: Stream[IO, Path] = ???
+  def titles: Stream[IO, Path] = ???
 
   def run: IO[Unit] = {
-    countWordsInBooks(books.map(readBook)).compile.last.flatMap(result =>
+    countWordsInBooks(titles).compile.last.flatMap(result =>
       IO.println(s"The result was $result")
     )
   }
