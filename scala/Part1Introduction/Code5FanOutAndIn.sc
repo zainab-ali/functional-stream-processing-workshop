@@ -3,66 +3,95 @@ import fs2.*
 import cats.effect.*
 import scala.concurrent.duration.*
 
+def fanIn[A](input: Stream[IO, Stream[IO, A]]): Stream[IO, A] =
+  input.parJoinUnbounded
+
+def fanOut[A, B](
+    input: Stream[IO, A],
+    fanFunction: A => Stream[IO, B]
+): Stream[IO, Stream[IO, B]] = input.map(fanFunction)
+
 def fanOutAndIn[A, B](
     input: Stream[IO, A],
     fanFunction: A => Stream[IO, B]
-): Stream[IO, B] = input.map(fanFunction).parJoinUnbounded
+): Stream[IO, B] = fanIn(fanOut(input, fanFunction))
 
-val sentenceData: Stream[Pure, String] = Stream("This", "is", "a", "test", "sentence")
+val sentenceData: Stream[Pure, String] =
+  Stream("This", "is", "a", "test", "sentence")
 sentenceData.compile.toList
 
 import cats.effect.unsafe.implicits.global
 Stream.sleep[IO](1.second).compile.last.unsafeRunSync()
 
-def bookData(title: String): Stream[IO, String] =
-  Stream.sleep[IO](1.second)
+def generateTestBook(title: String): Stream[IO, String] =
+  Stream
+    .sleep[IO](1.second)
     .flatMap(_ => sentenceData.repeatN(4L))
     .map(word => s"$title: $word")
 
 val firstSixWordsOfLittleDorritIO =
-  bookData("little-dorrit").take(6).compile.toList
+  generateTestBook("little-dorrit").take(6).compile.toList
 
 val (firstSixWordsTime, firstSixWordsOfLittleDorrit) =
   firstSixWordsOfLittleDorritIO.timed.unsafeRunSync()
 
 def countWords(book: Stream[IO, String]): Stream[IO, Long] =
-  book.map(_ => 1L).fold1(_ + _)
+  book.map(_ => 1L).foldMonoid
 
-def countWordsInBooks(books: Stream[IO, Stream[IO, String]]): Stream[IO, Long] =
-  fanOutAndIn(books, book => countWords(book)).fold1(_ + _)
+def countWordsInBook(title: String): Stream[IO, Long] = countWords(
+  generateTestBook(title)
+)
 
-val (timeToCompute, totalCount) = countWordsInBooks(
-  Stream(bookData("little-dorrit"), bookData("hard-times"))
+def countWordsInBooks(titles: Stream[IO, String]): Stream[IO, Long] =
+  fanOutAndIn(titles, title => countWordsInBook(title)).foldMonoid
+
+val (timeToCompute, _) = countWordsInBooks(
+  Stream("little-dorrit", "hard-times")
 ).compile.last.timed.unsafeRunSync()
 
 def countWordsInBooksSequentially(
-    books: Stream[IO, Stream[IO, String]]
+    titles: Stream[IO, String]
 ): Stream[IO, Long] =
-  books
-    .flatMap { book => countWords(book) }
-    .fold1(_ + _)
+  titles
+    .flatMap(title => countWordsInBook(title))
+    .foldMonoid
 
-val (timeToComputeSequentially, totalCountSequential) =
+val (timeToComputeSequentially, _) =
   countWordsInBooksSequentially(
-    Stream(bookData("little-dorrit"), bookData("hard-times"))
+    Stream("little-dorrit", "hard-times")
   ).compile.last.timed.unsafeRunSync()
 
 println(s"Fan out/in: $timeToCompute")
 println(s"Sequential: $timeToComputeSequentially")
 
 import fs2.io.file.*
-def realBookData(title: String): Stream[IO, String] =
-  Files[IO].readUtf8Lines(Path("data") / s"$title.txt")
-  .flatMap(line => Stream.emits(line.split("")))
 
-val (timeToComputeReal, totalCountReal) = countWordsInBooks(
-  Stream(realBookData("little-dorrit"), realBookData("hard-times"))
+def realBookData(title: String): Stream[IO, String] =
+  Files[IO]
+    .readUtf8Lines(Path("data") / s"$title.txt")
+    .flatMap(line => Stream.emits(line.split("")))
+
+def countWordsInRealBook(title: String): Stream[IO, Long] = countWords(
+  realBookData(title)
+)
+
+def countWordsInRealBooks(titles: Stream[IO, String]): Stream[IO, Long] =
+  fanOutAndIn(titles, title => countWordsInRealBook(title)).foldMonoid
+
+def countWordsInRealBooksSequentially(
+    titles: Stream[IO, String]
+): Stream[IO, Long] =
+  titles
+    .flatMap(title => countWordsInRealBook(title))
+    .foldMonoid
+
+val (timeToComputeReal, _) = countWordsInRealBooks(
+  Stream("little-dorrit", "hard-times")
 ).compile.last.timed.unsafeRunSync()
 
-val (timeToComputeSequentiallyReal, totalCountSequentialReal) = countWordsInBooksSequentially(
-  Stream(realBookData("little-dorrit"), realBookData("hard-times"))
+val (timeToComputeSequentiallyReal, _) = countWordsInRealBooksSequentially(
+  Stream("little-dorrit", "hard-times")
 ).compile.last.timed.unsafeRunSync()
 
 println(s"Real fan out/in: $timeToComputeReal")
 println(s"Real sequential: $timeToComputeSequentiallyReal")
-
