@@ -23,6 +23,12 @@ Stream(1, 2, 3)
 
 Stream(1, 2, 3)
   .evalTap(raiseIfTwo)
+  .compile
+  .count
+  .unsafeRunSync()
+
+Stream(1, 2, 3)
+  .evalTap(raiseIfTwo)
   .handleError(_ => 42)
   .compile
   .toList
@@ -33,17 +39,4 @@ Stream(1, 2, 3)
   .handleErrorWith(_ => Stream(42, 43))
   .compile
   .toList
-  .unsafeRunSync()
-
-// Retries
-
-def numbers: Stream[IO, Int] = Stream(1, 2, 3)
-  .evalTap(raiseIfTwo)
-  .handleErrorWith(_ => numbers)
-
-numbers
-  .evalMap(x => IO.println(x))
-  .take(2)
-  .compile
-  .drain
   .unsafeRunSync()
