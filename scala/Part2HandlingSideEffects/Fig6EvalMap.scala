@@ -9,9 +9,9 @@ object Fig6EvalMap extends WorkshopAquascapeApp {
 
   def stream(using Scape[IO]) = {
     Stream(1, 2, 3)
-      .stage("Source")
+      .stage("Stream(1, 2, 3)")
       .evalMap(x => print(x).trace())
-      .stage("evalMap")
+      .stage("evalMap(…)")
       .compile
       .drain
       .compileStage("compile.drain")
