@@ -1,19 +1,12 @@
 import fs2.*
 import cats.effect.*
 import cats.effect.unsafe.implicits.global
-  
 
 Stream(1, 2, 3)
   .take(2)
   .debugChunks()
   .compile
-  .toList
-
-Stream(1, 2, 3).repeat
-  .take(4)
-  .debugChunks()
-  .compile
-  .toList
+  .count
 
 Stream(1, 2, 3)
   .evalTap(IO.println)
@@ -21,7 +14,6 @@ Stream(1, 2, 3)
   .compile
   .drain
   .unsafeRunSync()
-
 
 Stream(1, 2, 3)
   .evalTapChunk(IO.println)

@@ -2,7 +2,7 @@ import cats.effect.*
 import fs2.*
 import fs2.io.file.Path
 
-// You must extend IOApp.Simple when using cats-effect IO.
+// Counts the total number of words in all books in the `data` directory 
 object Ex2WordCount extends IOApp.Simple {
 
   // Use the files API to read UTF8 strings and split them into words
@@ -28,7 +28,7 @@ object Ex2WordCount extends IOApp.Simple {
 
   def run: IO[Unit] = {
     countWordsInBooks(titles).compile.last.flatMap(result =>
-      IO.println(s"The result was $result")
+      IO.println(s"The total word count was $result")
     )
   }
 }

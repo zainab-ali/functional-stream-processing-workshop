@@ -4,7 +4,9 @@ import aquascape.*
 import scala.concurrent.duration.*
 
 object Fig2ParEvalMapUnordered extends WorkshopAquascapeApp {
-
+ tasksAAndC
+      .parEvalMapUnordered(3)(eval(startTime))
+      .evalMap(sleepFixed(startTime))
   def process(time: Int, i: Long): IO[Long] = IO.sleep(time.seconds).as(i)
 
   def stream(using Scape[IO]) = {
