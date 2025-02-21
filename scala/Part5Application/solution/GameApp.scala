@@ -9,7 +9,7 @@ import doodle.interact.*
 import doodle.interact.syntax.all.*
 import doodle.core.*
 
-trait GameApp[S, C] extends IOApp.Simple {
+trait GameAppSolution[S, C] extends IOApp.Simple {
 
   def game: IO[Game[S, C]]
 

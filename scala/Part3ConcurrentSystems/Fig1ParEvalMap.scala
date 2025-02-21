@@ -10,7 +10,7 @@ object Fig1ParEvalMap extends WorkshopAquascapeApp {
   def stream(using Scape[IO]) = {
     Stream(5, 4, 3, 2, 1).zipWithIndex
       .covary[IO]
-      .stage("Source", "upstream")
+      .stage("Stream(5, 4, … 1).zipWithIndex", "upstream")
       .fork("root", "upstream")
       .parEvalMap(3)((t, i) => process(t, i).trace())
       .stage("parEvalMap(3)(…)")

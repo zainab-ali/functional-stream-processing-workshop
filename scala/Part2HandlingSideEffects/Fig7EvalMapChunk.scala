@@ -2,16 +2,16 @@ import fs2.*
 import cats.effect.*
 import aquascape.*
 
-object Fig7EvalMapChunks extends WorkshopAquascapeApp {
+object Fig7EvalMapChunk extends WorkshopAquascapeApp {
   override def chunked: Boolean = true
 
   def print(x: Int): IO[String] = IO.println(s"Printing $x").as(x.toString)
 
   def stream(using Scape[IO]) = {
     Stream(1, 2, 3)
-      .stage("Source")
+      .stage("Stream(1, 2, 3)")
       .evalMapChunk(x => print(x).trace())
-      .stage("evalMapChunk")
+      .stage("evalMapChunk(…)")
       .take(2)
       .stage("take(2)")
       .compile

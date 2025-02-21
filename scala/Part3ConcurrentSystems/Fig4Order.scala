@@ -1,22 +1,27 @@
 import fs2.*
 import cats.effect.*
+import cats.Show
 import aquascape.*
 import scala.concurrent.duration.*
 
 object Fig4Order extends WorkshopAquascapeApp {
 
-  def process(time: Int, i: Long): IO[Long] = IO.sleep(time.seconds).as(i)
-  def processConstantTime(i: Long): IO[Long] = IO.sleep(2.seconds).as(i)
+  def eval(task: Task): IO[Task] = IO.sleep(task.time.seconds).as(task)
+  def sleepFixed(i: Task): IO[Task] = IO.sleep(2.seconds).as(i)
+
+  given Show[Task] = task => task.id.toString
+
+  case class Task(id: Char, time: Int)
 
   def stream(using Scape[IO]) = {
-    Stream(5, 4, 3, 2, 1).zipWithIndex
+    Stream(Task('a', 5), Task('c', 3))
       .covary[IO]
-      .stage("Source", "upstream")
+      .stage("Stream(Task('a', 5), Task('c', 3))", "upstream")
       .fork("root", "upstream")
-      .parEvalMapUnordered(3)((t, i) => process(t, i).trace())
-      .stage("parEvalMapUnordered(3)(…)")
-      .evalMap(processConstantTime)
-      .stage("evalMap(processConstantTime)")
+      .parEvalMapUnordered(3)(t => eval(t).trace())
+      .stage("parEvalMapUnordered(3)(eval)")
+      .evalMap(sleepFixed)
+      .stage("evalMap(sleepFixed)")
       .compile
       .drain
       .compileStage("compile.drain")

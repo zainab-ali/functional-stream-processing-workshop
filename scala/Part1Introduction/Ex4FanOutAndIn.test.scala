@@ -8,37 +8,44 @@ import scala.concurrent.duration.*
 
 class Ex4FanOutAndIn extends CatsEffectSuite {
 
-  val sentenceData: Stream[Pure, String] =
-    Stream("This is a test sentence").flatMap(sentence =>
-      Stream.emits(sentence.split(" "))
-    )
-  def bookData(title: String): Stream[IO, String] =
+  def generateTestBook(title: String): Stream[IO, String] = {
+    val sentenceData: Stream[Pure, String] =
+      Stream("This is a test sentence").flatMap(sentence =>
+        Stream.emits(sentence.split(" "))
+      )
     Stream
       .sleep[IO](1.second)
       .flatMap(_ => sentenceData.repeatN(4L))
-      .map(word => s"book$title: $word")
-
-  def countWordsInBooksWithParJoinUnbounded(
-      books: Stream[IO, Stream[IO, String]]
-  ): Stream[IO, Long] = ???
-
-  def countWordsInBooksSequentially(
-      books: Stream[IO, Stream[IO, String]]
-  ): Stream[IO, Long] = ???
+      .map(word => s"$title: $word")
+  }
 
   def countWords(book: Stream[IO, String]): Stream[IO, Long] =
-    book.map(_ => 1L).fold1(_ + _)
+    book.map(_ => 1L).foldMonoid
+
+  def countWordsInBook(title: String): Stream[IO, Long] = countWords(
+    generateTestBook(title)
+  )
+
+  // Use the `countWordsInBook` function.
+  def countWordsInBooksWithFanOutAndIn(
+      title: Stream[IO, String]
+  ): Stream[IO, Long] = ???
+
+  // Use the `countWordsInBook` function.
+  def countWordsInBooksSequentially(
+      books: Stream[IO, String]
+  ): Stream[IO, Long] = ???
 
   test("fan-out fan-in") {
-    val books = Stream(bookData("little-dorrit"), bookData("hard-times"))
+    val books = Stream("little-dorrit", "hard-times")
     val result: IO[(FiniteDuration, Option[Long])] =
-      countWordsInBooksWithParJoinUnbounded(books).compile.last.timed
+      countWordsInBooksWithFanOutAndIn(books).compile.last.timed
 
     assertIO(TestControl.executeEmbed(result), (1.seconds, Some(40L)))
   }
 
   test("sequential") {
-    val books = Stream(bookData("little-dorrit"), bookData("hard-times"))
+    val books = Stream("little-dorrit", "hard-times")
     val result: IO[(FiniteDuration, Option[Long])] =
       countWordsInBooksSequentially(books).compile.last.timed
 
