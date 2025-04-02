@@ -6,7 +6,7 @@ import cats.syntax.all.*
 import cats.data.*
 import scala.concurrent.duration.*
 
-class Ex4FanOutAndIn extends CatsEffectSuite {
+class Ex4FanOutAndInSolutions extends CatsEffectSuite {
 
   def generateTestBook(title: String): Stream[IO, String] = {
     val sentenceData: Stream[Pure, String] =
@@ -29,12 +29,15 @@ class Ex4FanOutAndIn extends CatsEffectSuite {
   // Use the `countWordsInBook` function.
   def countWordsInBooksWithFanOutAndIn(
       titles: Stream[IO, String]
-  ): Stream[IO, Long] = ???
+  ): Stream[IO, Long] =
+    titles.map(title => countWordsInBook(title)).parJoinUnbounded.foldMonoid
 
   // Use the `countWordsInBook` function.
   def countWordsInBooksSequentially(
       titles: Stream[IO, String]
-  ): Stream[IO, Long] = ???
+  ): Stream[IO, Long] = titles.flatMap { title =>
+    countWordsInBook(title)
+  }.foldMonoid
 
   test("fan-out fan-in") {
     val titles = Stream("little-dorrit", "hard-times")
