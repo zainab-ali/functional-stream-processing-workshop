@@ -4,7 +4,12 @@ import fs2.*
 class Ex2IncrementalPipelinesSolutions extends CatsEffectSuite {
 
   val userIds: Stream[Pure, String] =
-    Stream.range(0, Int.MaxValue).map(id => s"u$id")
+    Stream
+      .range(0, Int.MaxValue)
+      .map(id => s"u$id")
+      .take(
+        100
+      ) // This `take(100)` speeds up test execution in CI. It is not needed for passing the test.
 
   val oneAndFortyTwo: Stream[Pure, String] =
     Stream("u42", "u1", "u42").repeatN(100)
