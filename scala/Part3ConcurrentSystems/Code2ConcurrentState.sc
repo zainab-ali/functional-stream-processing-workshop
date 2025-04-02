@@ -4,72 +4,75 @@ import cats.effect.IO
 import cats.effect.Ref
 import cats.effect.unsafe.implicits.global
 
+/** A ref can be used to safely share state */
 val counter = Ref.of[IO, Int](0).unsafeRunSync()
 
-Ref
-  .of[IO, Int](0)
-  .flatMap { counter =>
-    counter.set(42).flatMap(_ => counter.get)
-  }
+/** It has get, set and update functions */
+counter.get.unsafeRunSync()
+
+counter
+  .set(42)
+  .flatMap(_ => counter.get)
   .unsafeRunSync()
 
-Ref
-  .of[IO, Int](0)
-  .flatMap { counter =>
-    counter.update(_ + 42).flatMap(_ => counter.get)
-  }
+counter
+  .update(_ + 42)
+  .flatMap(_ => counter.get)
   .unsafeRunSync()
 
-Ref
-  .of[IO, Int](0)
-  .flatMap { counter =>
-    val sleepAndIncrement =
-      Stream.sleep[IO](1.second) ++ Stream.eval(counter.update(_ + 1))
-    sleepAndIncrement.repeat.take(3).compile.drain.flatMap(_ => counter.get)
-  }
+/** It can be updated as part of a stream */
+val incrementEverySecond =
+  Stream.eval(counter.update(_ + 1)).repeat.spaced(1.second)
+
+incrementEverySecond
+  .take(3)
+  .compile
+  .drain
+  .flatMap(_ => counter.get)
   .unsafeRunSync()
 
-Ref
+/** It can be updated and accessed concurrently */
+val printTwicePerSecond =
+  Stream.eval(counter.get.flatMap(IO.println)).repeat.spaced(500.millis)
+
+incrementEverySecond
+  .take(3)
+  .concurrently(printTwicePerSecond)
+  .compile
+  .drain
+  .unsafeRunSync()
+
+import fs2.concurrent.*
+
+SignallingRef
   .of[IO, Int](0)
   .flatMap { counter =>
-    val sleepAndIncrement =
-      Stream.sleep[IO](1.second) ++ Stream.exec(counter.update(_ + 1))
-    val sleepAndPrint = Stream.sleep[IO](500.milliseconds) ++ Stream.eval(
-      counter.get.flatMap(IO.println)
-    )
-    sleepAndIncrement
-      .repeatN(3)
-      .concurrently(sleepAndPrint.repeat)
+    val incrementEverySecond =
+      Stream.repeatEval(counter.update(_ + 1)).spaced(1.second)
+
+    val printOnChange = counter.discrete.evalMap(IO.println)
+    incrementEverySecond
+      .take(3)
+      .concurrently(printOnChange)
       .compile
       .drain
   }
   .unsafeRunSync()
 
-import fs2.concurrent.*
+SignallingRef
+  .of[IO, Int](0)
+  .flatMap { counter =>
+    val incrementEverySecond =
+      Stream.repeatEval(counter.update(_ + 1)).spaced(1.second)
+    val printTwicePerSecond =
+      counter.continuous.spaced(500.millis).evalMap(IO.println)
 
-SignallingRef.of[IO, Int](0).flatMap { signallingRef =>
-  val increment =
-    Stream.repeatEval(signallingRef.update(_ + 1)).spaced(1.second).take(3)
-
-  increment
-    .concurrently(signallingRef.discrete.evalMap(IO.println))
-    .compile
-    .drain
-}.unsafeRunSync()
-
-SignallingRef.of[IO, Int](0).flatMap { signallingRef =>
-  val increment =
-    Stream.repeatEval(signallingRef.update(_ + 1)).spaced(1.second).take(3)
-
-  increment
-    .concurrently(signallingRef.continuous.spaced(500.millis).evalMap(IO.println))
-    .compile
-    .drain
-}.unsafeRunSync()
-
-
-SignallingRef.of[IO, Int](0).flatMap { signallingRef =>
-  val increment = Stream.repeatEval(signallingRef.update(_ + 1)).take(3) ++ Stream.unit.repeat
-  val print = signallingRef.continuous.evalMap(IO.println).take(5)
-  print.interleave(increment).compile.drain
-}.unsafeRunSync()
+    incrementEverySecond
+      .take(3)
+      .concurrently(
+        printTwicePerSecond
+      )
+      .compile
+      .drain
+  }
+  .unsafeRunSync()
