@@ -9,10 +9,6 @@ on:
 jobs:
   tests:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        java-version: ['11', '21']
-
     steps:
     - uses: actions/checkout@v4
     - uses: VirtusLab/scala-cli-setup@main
@@ -20,3 +16,5 @@ jobs:
         jvm: '21'
     - name: 'Compile'
       run: scala-cli compile --test project.scala scala/*
+    - name: 'Test'
+      run: scala-cli test project.scala scala/**/solutions.test.scala
