@@ -17,4 +17,4 @@ jobs:
     - name: 'Compile'
       run: scala-cli compile --test project.scala scala/*
     - name: 'Test'
-      run: scala-cli test project.scala scala/**/solutions.test.scala
+      run: scala-cli test project.scala scala/**/*.solutions.test.scala
