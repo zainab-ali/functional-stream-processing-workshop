@@ -1,10 +1,10 @@
-# Functional stream processing workshop
+# Functional stream processing exercises
 
-This repository contains code examples, demos and exercises.
+This repository contains code examples, demos and exercises for the [Functional Stream Processing](https://pureasync.gumroad.com/l/functional-stream-processing-in-scala) book.
 
 ## Setup instructions
 
-This workshop uses `scala-cli` and Scala 3. Post Scala 3.5, this is just `scala`.
+Use `scala` version 3.5+.
 
  - Install the [scala command](https://docs.scala-lang.org/getting-started/install-scala.html)
  - Clone this repository.
