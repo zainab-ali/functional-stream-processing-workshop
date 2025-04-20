@@ -1,8 +1,5 @@
 package cheatsheet
 
-//> using dep co.fs2::fs2-core::3.12.0
-//> using dep co.fs2::fs2-io::3.12.0
-
 import fs2.Stream
 import fs2.io.file.Files
 import fs2.io.file.Path
@@ -164,7 +161,9 @@ object WriteCheatSheet extends IOApp.Simple {
         .diff(extractedMethodCalls)
         .map(name => s""" "$name" """)
         .mkString("List(", ",\n", ")")
-      IO.println(s"New methods found:\n${newMethods}\n${redundantMethods}")
+      IO.raiseError(
+        new Error(s"New methods found:\n${newMethods}\n${redundantMethods}")
+      )
     } else {
       writeCheatSheet(cheatSheet)
     }
