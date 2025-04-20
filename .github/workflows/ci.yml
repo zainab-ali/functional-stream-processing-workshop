@@ -18,3 +18,5 @@ jobs:
       run: scala-cli compile --test project.scala scala/*
     - name: 'Test'
       run: scala-cli test project.scala scala/**/*.solutions.test.scala
+    - name: 'Validate cheatsheet'
+      run: scala-cli run project.scala cheatsheet
