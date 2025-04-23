@@ -10,14 +10,13 @@ final case class CheatSheet(
 )
 
 object CheatSheet {
+
   def default: CheatSheet = {
-    val utils = List(
-      "s.compile",
+    val basics = List(
       "s.debug",
       "s.through(f)",
       "s.covary[F]",
-      "s.covaryOutput[O2]",
-      "s.drain"
+      "s.covaryOutput[O2]"
     )
 
     val constructors = List(
@@ -91,7 +90,8 @@ object CheatSheet {
       "s.evalTap(f)",
       "s.evalFilter(f)",
       "s.evalScan(z)(f)",
-      "s.evalMapAccumulate(s)(f)"
+      "s.evalMapAccumulate(s)(f)",
+      "s.drain"
     )
 
     val errors = List(
@@ -142,7 +142,7 @@ object CheatSheet {
 
     val part1 = Part(
       List(
-        Section("Utils", utils),
+        Section("Basics", basics),
         Section("Constructors", constructors),
         Section("Compile", compile)
       )
@@ -178,8 +178,10 @@ object CheatSheet {
     )
   }
   private def omittedMethodCalls = List(
-          "s.groupWithin(chunkSize, timeout)",
-
+    "s.groupWithin(chunkSize, timeout)",
+    "s.compile",
+    "Stream.fromPublisher(chunkSize)(subscribe)",
+    "s.evalFold(z)(f)",
     "s.++(s2)",
     "s.as(o2)",
     "s.attempts(delays)",
