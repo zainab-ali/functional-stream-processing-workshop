@@ -123,7 +123,7 @@ object HtmlOutput {
         ),
         footer(
           Style.footer,
-          span("© 2025 by Zainab Ali"),
+          span("Licensed under CC BY 4.0 by Zainab Ali, 2025"),
           span("Published by Pure Async LTD")
         )
       )
