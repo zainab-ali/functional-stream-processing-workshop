@@ -18,6 +18,14 @@ Use `scala` version 3.5+.
    ```
  - Open the project in your favourite IDE.
 
+## Opening a REPL
+
+Run:
+
+```
+scala repl project.scala
+```
+
 ## Checking your solutions
 
 Each exercise is a test. You can check your solutions by running the tests.
