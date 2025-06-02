@@ -3,11 +3,11 @@ import fs2.*
 /* Functional stream processing */
 
 /* A list-based approach is testable and easy to reason through, but runs out of memory for large values */
-def countNumbers(until: Int, predicate: Int => Boolean): Int =
+def countNumbersList(until: Int, predicate: Int => Boolean): Int =
   List.range(0, until).filter(predicate).size
 
 /* A loop is not composable, so is not easy to test or reason through */
-def countNumbers(until: Int, predicate: Int => Boolean): Int = {
+def countNumbersLoop(until: Int, predicate: Int => Boolean): Int = {
   var count: Int = 0
   var i: Int = 0
   while (i < until) {
@@ -18,7 +18,7 @@ def countNumbers(until: Int, predicate: Int => Boolean): Int = {
 }
 
 /* Explicit recursion is also not composable */
-def countNumbers(until: Int, predicate: Int => Boolean): Int = {
+def countNumbersRec(until: Int, predicate: Int => Boolean): Int = {
   @scala.annotation.tailrec
   def go(count: Int, i: Int): Int = {
     if (i < until) {
@@ -35,7 +35,7 @@ def countNumbers(until: Int, predicate: Int => Boolean): Int = {
 }
 
 /* A stream is composable, testable and can be reasoned through */
-def countNumbers(until: Int, predicate: Int => Boolean): Long =
+def countNumbersStream(until: Int, predicate: Int => Boolean): Long =
   Stream.range(0, until).filter(predicate).compile.count.toInt
 
 /* Streams vs Lists */
