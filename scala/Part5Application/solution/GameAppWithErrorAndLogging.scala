@@ -30,7 +30,8 @@ trait GameAppWithErrorAndLogging[S, C] extends IOApp.Simple {
             .map(_.trim)
             .mapFilter(game.input)
             .map(input =>
-              game.action(input, stateSignal)
+              game
+                .action(input, stateSignal)
                 .adaptError { case e =>
                   enrichError(input)(e)
                 }

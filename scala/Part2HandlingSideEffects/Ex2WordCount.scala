@@ -2,7 +2,7 @@ import cats.effect.*
 import fs2.*
 import fs2.io.file.Path
 
-// Counts the total number of words in all books in the `data` directory 
+// Counts the total number of words in all books in the `data` directory
 object Ex2WordCount extends IOApp.Simple {
 
   // Use the files API to read UTF8 strings and split them into words

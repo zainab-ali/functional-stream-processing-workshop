@@ -22,37 +22,38 @@ trait GameAppWithErrorAndLoggingAndMetrics[S, C] extends IOApp.Simple {
       val loop =
         (
           GameAppWithErrorAndLoggingAndMetrics.Logger("game.log"),
-          GameAppWithErrorAndLoggingAndMetrics.Metrics("metrics.log"),
+          GameAppWithErrorAndLoggingAndMetrics.Metrics("metrics.log")
         )
           .flatMapN { case (logger, metrics) =>
-          val renderLoop = stateSignal.continuous
-            .map(game.render)
-            .metered(20.millis)
+            val renderLoop = stateSignal.continuous
+              .map(game.render)
+              .metered(20.millis)
 
-          val actions = fs2.io
-            .stdinUtf8[IO](1024)
-            .map(_.trim)
-            .mapFilter(game.input)
-            .evalTap(_ => metrics.incrementCommandCount)
-            .map(input =>
-              game.action(input, stateSignal)
-                .adaptError { case e =>
-                  enrichError(input)(e)
-                }
-                .onFinalizeCase {
-                  case ExitCase.Succeeded =>
-                    logger.info(s"Action with input $input succeeded.")
-                  case ExitCase.Errored(err) =>
-                    logger.info(s"Action with input $input errored ${err}.")
-                  case ExitCase.Canceled =>
-                    logger.info(s"Action with input $input was canceled.")
-                }
-            )
-            .parJoinUnbounded
-          renderLoop
-            .concurrently(actions)
-            .concurrently(game.simulation(stateSignal))
-        }
+            val actions = fs2.io
+              .stdinUtf8[IO](1024)
+              .map(_.trim)
+              .mapFilter(game.input)
+              .evalTap(_ => metrics.incrementCommandCount)
+              .map(input =>
+                game
+                  .action(input, stateSignal)
+                  .adaptError { case e =>
+                    enrichError(input)(e)
+                  }
+                  .onFinalizeCase {
+                    case ExitCase.Succeeded =>
+                      logger.info(s"Action with input $input succeeded.")
+                    case ExitCase.Errored(err) =>
+                      logger.info(s"Action with input $input errored ${err}.")
+                    case ExitCase.Canceled =>
+                      logger.info(s"Action with input $input was canceled.")
+                  }
+              )
+              .parJoinUnbounded
+            renderLoop
+              .concurrently(actions)
+              .concurrently(game.simulation(stateSignal))
+          }
       loop.animateToIO(frame)
     }
   }
