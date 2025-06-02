@@ -44,7 +44,6 @@ time
   .toList
   .unsafeRunSync()
 
-
 time
   .flatMap { startTime =>
     tasks
@@ -54,12 +53,10 @@ time
   .toList
   .unsafeRunSync()
 
-
 def processConstantTime(startTime: FiniteDuration)(task: Task): IO[Task] =
   printStarting(startTime, task).bracket[Task](_ =>
     IO.sleep(2.seconds).as(task)
   )(_ => printProcessed(startTime, task))
-
 
 time
   .flatMap { startTime =>

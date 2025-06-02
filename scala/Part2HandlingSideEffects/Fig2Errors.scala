@@ -4,7 +4,8 @@ import aquascape.*
 import cats.syntax.all.*
 
 object Fig2Errors extends WorkshopAquascapeApp {
-  def raiseIfTwo(x: Int): IO[Int] = IO.raiseError(new Error("!")).whenA(x == 2).as(x)
+  def raiseIfTwo(x: Int): IO[Int] =
+    IO.raiseError(new Error("!")).whenA(x == 2).as(x)
 
   def stream(using Scape[IO]) = {
     Stream(1, 2, 3)
