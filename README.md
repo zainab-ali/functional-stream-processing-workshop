@@ -43,3 +43,25 @@ scala test project.scala scala
 ```
 
 Some exercises have solutions in a `solutions.test.scala` file. You can consult this file if you get stuck.
+
+## Generating the aquascapes
+
+You can generate the aquascapes with `scala`
+
+```sh
+scala --power package \
+      -o aquascape-playground/App.js \
+	  -f --js project.scala scalajs/WorkshopAquascapeApp.scala scala/Part1Introduction/Fig2Take.scala
+```
+View your aquascape by navigating to the `aquascape-playground` directory and running a webserver of your choice:
+
+```sh
+cd aquascape-playground
+althttpd
+```
+
+Alternatively, you can generate a PNG image:
+
+```sh
+scala run project.scala scala/WorkshopAquascapeApp.scala scala/Part1Introduction/Fig2Take.scala
+```
