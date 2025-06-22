@@ -1,51 +1,53 @@
 import fs2.*
 import cats.effect.IO
 import cats.effect.unsafe.implicits.*
+import scala.util.control.NoStackTrace
 
-Stream
-  .bracket(IO.println("Acquiring"))(_ => IO.println("Releasing"))
+object BOOM extends Throwable("BOOM!") with NoStackTrace
+
+case class Tap(temp: String)
+
+def openTap(temp: String): IO[Tap] =
+  IO.println(s"Opening $temp tap.").as(Tap(temp))
+
+def closeTap(tap: Tap): IO[Unit] =
+  IO.println(s"Closing ${tap.temp} tap.")
+
+def drawWater(tap: Tap): IO[Unit] =
+  IO.println(s"Drawing water from ${tap.temp} tap.")
+
+openTap("hot").flatMap { tap =>
+  drawWater(tap)
+  .attempt
+  .flatTap(_ => closeTap(tap))
+  .rethrow
+}
+
+val tapStream = Stream.bracket(openTap("hot"))(closeTap)
+
+tapStream.compile.toList.unsafeRunSync()
+
+tapStream
+  .evalMap(drawWater)
   .compile
   .drain
   .unsafeRunSync()
 
-Stream
-  .bracket(IO.println("Acquiring").as(1))(n => IO.println(s"Releasing $n"))
-  .flatMap { n =>
-    Stream.eval(IO.println(s"Using $n"))
-  }
+def drawTwice(tap: Tap) = Stream.eval(drawWater(tap)).repeat.take(2)
+
+tapStream
+  .flatMap(drawTwice)
   .compile
   .drain
   .unsafeRunSync()
 
-Stream
-  .bracket(IO.println("Acquiring").as(1))(n => IO.println(s"Releasing $n"))
-  .flatMap { n =>
-    Stream.eval(IO.println(s"Using $n"))
-  }
-  .repeatN(3)
+Stream("hot", "cold").flatMap { temp =>
+  Stream.bracket(openTap(temp))(closeTap)
+      .flatMap(drawTwice)
+    }.compile.drain
+      .unsafeRunSync()
+
+tapStream
+  .evalMap(_ => IO.raiseError(BOOM))
   .compile
   .drain
-  .unsafeRunSync()
-
-Stream(1, 2, 3)
-  .take(2)
-  .debug()
-  .onFinalize(IO.println("Finished"))
-  .compile
-  .toList
-  .unsafeRunSync()
-
-Stream(1, 2, 3)
-  .take(2)
-  .debug()
-  .onFinalizeCase(exitCase => IO.println(s"Finished with $exitCase"))
-  .compile
-  .toList
-  .unsafeRunSync()
-
-Stream
-  .raiseError[IO](new Error("Boom!"))
-  .onFinalizeCase(exitCase => IO.println(s"Finished with $exitCase"))
-  .compile
-  .toList
-  .unsafeRunSync()
