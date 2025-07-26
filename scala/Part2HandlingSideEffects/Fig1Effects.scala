@@ -3,16 +3,17 @@ import cats.effect.*
 import aquascape.*
 
 object Fig1Effects extends WorkshopAquascapeApp {
-  def print(x: Int): IO[String] = IO.println(s"Printing $x").as(x.toString)
+  def greeting(name: String): IO[String] = IO.println(s"Hi $name!").as(s"Hi $name!")
 
   def stream(using Scape[IO]) = {
-    Stream(1, 2, 3)
-      .stage("Stream(1, 2, 3)")
+    Stream("Mao", "Owl")
+      .stage("Stream(Mao, Owl)")
       /* trace draws the side-effect's output as part of our scape. */
-      .evalMap(x => print(x).trace())
+      .evalMap(x => greeting(x).trace().void)
       .stage("evalMap(…)")
+      .head
       .compile
       .drain
-      .compileStage("compile.drain")
+      .compileStage("head.compile.drain")
   }
 }
