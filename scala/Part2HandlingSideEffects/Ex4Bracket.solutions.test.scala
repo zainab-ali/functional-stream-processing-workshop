@@ -12,6 +12,7 @@ class Ex4BracketSolutions extends CatsEffectSuite {
   case object Err extends Throwable
 
   // Record the time taken to evaluate a stream.
+  // Use the `Recorder.record` function to log the time period.
   // Hint: Call cats.effect.Clock[IO].realTime to get the time
   def timed[A](recorder: Recorder)(in: Stream[IO, A]): Stream[IO, A] = Stream
     .bracket(Clock[IO].realTime)(startTime =>
@@ -21,7 +22,7 @@ class Ex4BracketSolutions extends CatsEffectSuite {
     )
     .flatMap(_ => in)
 
-  test("Time a stream") {
+  test("Time a stream outputting a single element") {
     val result = Recorder.run { recorder =>
       Stream
         .sleep[IO](1.second)
@@ -30,11 +31,23 @@ class Ex4BracketSolutions extends CatsEffectSuite {
 
     assertIO(TestControl.executeEmbed(result), List(1.second))
   }
+  test("Time a stream ouputting multiple elements") {
+    val result = Recorder.run { recorder =>
+      Stream
+        .sleep[IO](1.second)
+        .repeatN(3)
+        .through(timed(recorder))
+    }
+
+    assertIO(TestControl.executeEmbed(result), List(3.second))
+  }
+
 
   test("Time several streams") {
     val result = Recorder.run { recorder =>
       Stream(1, 2, 3).flatMap { n =>
-        Stream.sleep[IO](n.seconds).through(timed(recorder))
+        val inputStream = Stream.sleep[IO](n.seconds)
+          inputStream.through(timed(recorder))
       }
     }
 
@@ -44,7 +57,7 @@ class Ex4BracketSolutions extends CatsEffectSuite {
     )
   }
 
-  test("Time streams on error") {
+  test("Time a stream on error") {
     val result = Recorder.run { recorder =>
       (Stream.sleep[IO](1.second) ++ Stream.raiseError[IO](Err))
         .through(timed(recorder))
@@ -61,7 +74,9 @@ class Ex4BracketSolutions extends CatsEffectSuite {
 
 object Ex4BracketSolutions {
   final class Recorder(ref: Ref[IO, Chain[FiniteDuration]]) {
-    def record(time: FiniteDuration): IO[Unit] = ref.update(_ :+ time)
+
+    /* Adds a time period to the list of times */
+    def record(period: FiniteDuration): IO[Unit] = ref.update(_ :+ period)
 
     private[Recorder] def get: IO[List[FiniteDuration]] = ref.get.map(_.toList)
   }
@@ -70,6 +85,7 @@ object Ex4BracketSolutions {
     def apply(): IO[Recorder] =
       Ref.of[IO, Chain[FiniteDuration]](Chain.empty).map(new Recorder(_))
 
+    /* Evaluates a stream, then returns a list of recorded time periods */
     def run(f: Recorder => Stream[IO, Unit]): IO[List[FiniteDuration]] =
       apply().flatMap { recorder => f(recorder).compile.drain >> recorder.get }
   }

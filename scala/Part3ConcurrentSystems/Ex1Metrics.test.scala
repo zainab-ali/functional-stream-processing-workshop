@@ -11,6 +11,7 @@ class Ex1Metrics extends CatsEffectSuite {
 
   import Ex1Metrics.*
 
+  // Implement this function
   def makeCounter: IO[CounterMetric] = ???
 
   test("counts number of elements in a stream") {
@@ -33,7 +34,10 @@ class Ex1Metrics extends CatsEffectSuite {
 object Ex1Metrics {
 
   trait CounterMetric {
+    // Increments the counter for each element in the input stream.
     def count[A]: Pipe[IO, A, A]
+
+    // A discrete stream of counts
     def counts: Stream[IO, Int]
   }
 }

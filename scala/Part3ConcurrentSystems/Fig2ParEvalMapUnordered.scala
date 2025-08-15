@@ -3,7 +3,7 @@ import cats.effect.*
 import aquascape.*
 import scala.concurrent.duration.*
 
-object Fig1ParEvalMap extends WorkshopAquascapeApp {
+object Fig2ParEvalMapUnordered extends WorkshopAquascapeApp {
 
   final case class Task(name: String, time: Int)
 
@@ -20,8 +20,8 @@ object Fig1ParEvalMap extends WorkshopAquascapeApp {
         .covary[IO]
         .stage("tasks", "upstream")
         .fork("root", "upstream")
-        .parEvalMap(3)(t => process(startTime)(t).trace())
-        .stage("parEvalMap(3)(…)")
+        .parEvalMapUnordered(3)(t => process(startTime)(t).trace())
+        .stage("parEvalMapUnordered(3)(…)")
         .compile
         .drain
         .compileStage("compile.drain")

@@ -7,9 +7,23 @@ import fs2.*
 
 val greetingStream = Stream.eval(greetingIO)
 
-greetingStream.compile.count.unsafeRunSync()
+val greetThriceStream = greetingStream.repeat.take(3)
 
-greetingStream.compile.drain.unsafeRunSync()
+val greetAndCountIO: IO[Long] = greetThriceStream.compile.count
+
+greetAndCountIO.unsafeRunSync()
+
+val greetThriceIO: IO[Unit] = greetThriceStream.compile.drain
+greetThriceIO.unsafeRunSync()
+
+Stream("Mao", "Owl")
+  .evalMap(name => IO.println(s"Hi $name!"))
+  .head
+  .compile
+  .drain
+
+val count: Long = Stream(1,2,3).compile.count
+val countIO: IO[Long] = Stream(1,2,3).evalMap(IO.println(_)).compile.count
 
 Stream.exec(greetingIO)
 
