@@ -1,0 +1,825 @@
+
+
+zainab@beagle:~/dev/zainab/blog/ > cd ../../zainab-ali/functio
+nal-stream-processing-workshop
+zainab@beagle:~/dev/zainab-ali/functional-stream-processing-wo
+rkshop/ > nix develop
+warning: Git tree '/Users/zainab/dev/zainab-ali/functional-str
+eam-processing-workshop' is dirty
+λ> pwd
+/Users/zainab/dev/zainab-ali/functional-stream-processing-work
+shop
+λ> scala-cli
+
+^Cλ> scala-cli compile project.scala scala/Part1Introduction/C
+ode1WhatAreStreams.sc
+Compiling project (Scala 3.7.0, JVM (21))
+Compiled project (Scala 3.7.0, JVM (21))
+λ> scala-cli repl project.scala scala/Part1Introduction/Code1W
+hatAreStreams.sc
+
+Welcome to Scala 3.7.0 (21.0.4, Java OpenJDK 64-Bit Server VM)
+.
+Type in expressions for evaluation. Or try :help.
+
+
+scala> def countNumbers(until: Int, predicate: Int => Boolean)
+: Int = ???
+def countNumbers(until: Int, predicate: Int => Boolean): Int
+
+scala> countNumbers(4, true)
+-- [E007] Type Mismatch Error: -------------------------------
+------------------
+1 |countNumbers(4, true)
+  |                ^^^^
+  |                Found:    (true : Boolean)
+  |                Required: Int => Boolean
+  |
+  | longer explanation available when compiling with `-explain
+`
+1 error found
+
+scala> countNumbers(4, _ % 2)
+-- [E007] Type Mismatch Error: -------------------------------
+------------------
+1 |countNumbers(4, _ % 2)
+  |                ^^^^^
+  |                Found:    Int
+  |                Required: Boolean
+  |
+  | longer explanation available when compiling with `-explain
+`
+1 error found
+
+
+scala> def countNumbersList(until: Int, predicate: Int => Bool
+ean): Int =
+     |   List.range(0, until).filter(predicate).size
+     |
+def countNumbersList(until: Int, predicate: Int => Boolean): I
+nt
+
+
+scala> List.range(0, 4)
+val res0: List[Int] = List(0, 1, 2, 3)
+
+
+scala> List.range(0, 4).filter(_ % 2)
+-- [E007] Type Mismatch Error: -------------------------------
+------------------
+1 |List.range(0, 4).filter(_ % 2)
+  |                        ^^^^^
+  |                        Found:    Int
+  |                        Required: Boolean
+  |
+  | longer explanation available when compiling with `-explain
+`
+1 error found
+
+
+scala> List.range(0, 4).filter(_ % 2 == 2)
+
+val res1: List[Int] = List()
+
+
+scala> List.range(0, 4).filter(_ % 2 == 0)
+
+val res2: List[Int] = List(0, 2)
+
+
+scala> List.range(0, 4).filter(_ % 2 == 0).size
+val res3: Int = 2
+
+
+scala> List.range(0, 100).filter(_ % 2 == 0).size
+
+val res4: Int = 50
+
+
+scala> countNumbersList(100, _ % 2 == 0)
+val res5: Int = 50
+                                scala> countNumbersList(Int.Ma
+scala> countNumbersList(Int.MaxValue, _ % 2 == 0)
+Exception in thread "RMI TCP Connection(idle)" java.lang.OutOf
+MemoryError: Java heap space
+        at java.rmi/sun.rmi.transport.tcp.TCPTransport.handleM
+essages(TCPTransport.java:597)
+        at java.rmi/sun.rmi.transport.tcp.TCPTransport$Connect
+ionHandler.run0(TCPTransport.java:844)
+        at java.rmi/sun.rmi.transport.tcp.TCPTransport$Connect
+ionHandler.lambda$run$0(TCPTransport.java:721)
+        at java.rmi/sun.rmi.transport.tcp.TCPTransport$Connect
+ionHandler$$Lambda/0x000000011e6e4060.run(Unknown Source)
+        at java.base/java.security.AccessController.executePri
+vileged(AccessController.java:778)
+        at java.base/java.security.AccessController.doPrivileg
+ed(AccessController.java:400)
+        at java.rmi/sun.rmi.transport.tcp.TCPTransport$Connect
+ionHandler.run(TCPTransport.java:720)
+        at java.base/java.util.concurrent.ThreadPoolExecutor.r
+unWorker(ThreadPoolExecutor.java:1144)
+        at java.base/java.util.concurrent.ThreadPoolExecutor$W
+orker.run(ThreadPoolExecutor.java:642)
+        at java.base/java.lang.Thread.runWith(Thread.java:1596
+)
+        at java.base/java.lang.Thread.run(Thread.java:1583)
+java.lang.OutOfMemoryError: Java heap space
+  at scala.collection.immutable.List.prependedAll(List.scala:1
+56)
+  at scala.collection.immutable.List$.from(List.scala:685)
+  at scala.collection.immutable.List$.from(List.scala:682)
+  at scala.collection.IterableFactory.range(Factory.scala:132)
+  at scala.collection.IterableFactory.range$(Factory.scala:132
+)
+  at scala.collection.immutable.List$.range(List.scala:682)
+  at rs$line$2$.countNumbersList(rs$line$2:2)
+  ... 25 elided
+
+
+scala>
+
+scala> def countNumbersLoop(until: Int, predicate: Int => Bool
+ean): Int = {
+     |   var count: Int = 0
+     |   var i: Int = 0
+     |   while (i < until) {
+     |     if (predicate(i)) count = count + 1
+     |     i = i + 1
+     |   }
+     |   count
+     | }
+     |
+     |
+def countNumbersLoop(until: Int, predicate: Int => Boolean): I
+nt
+
+scala> countNumbersLoop(4, _ % 2 == 0)
+val res7: Int = 2
+
+scala> countNumbersLoop(Int.MaxValue, _ => true)
+val res8: Int = 2147483647
+
+scala> countNumbersLoop(Int.MaxValue, _ => true)
+val res9: Int = 2147483647
+
+scala> def countNumbersRec(until: Int, predicate: Int => Boole
+an): Int =
+     | ???
+def countNumbersRec(until: Int, predicate: Int => Boolean): In
+t
+
+scala>
+     | /* Explicit recursion is also not composable */
+     | def countNumbersRec(until: Int, predicate: Int => Boole
+an): Int = {
+     |   @scala.annotation.tailrec
+     |   def go(count: Int, i: Int): Int = {
+     |     if (i < until) {
+     |       if (predicate(i)) {
+     |         go(count + 1, i + 1)
+     |       } else {
+     |         go(count, i + 1)
+     |       }
+     |     } else {
+     |       count
+     |     }
+     |   }
+     |   go(0, 0)
+     | }
+def countNumbersRec(until: Int, predicate: Int => Boolean): In
+t
+
+scala> countNumbersRec(Int.MaxValue, _ => true)
+val res10: Int = 2147483647
+
+scala> countNumbersRec(Int.MaxValue, _ => true)
+val res11: Int = 2147483647
+
+scala> def countNumbersRec(until: Int, predicate: Int => Boole
+an): Int = {
+     |   // @scala.annotation.tailrec
+     |   def go(count: Int, i: Int): Int = {
+     |     if (i < until) {
+     |       if (predicate(i)) {
+     |         go(count + 1, i + 1)
+     |       } else {
+     |         go(count, i + 1)
+     |       }
+     |     } else {
+     |       count
+     |     }
+     |   }
+     |   go(0, 0)
+     | }
+     |
+     |
+def countNumbersRec(until: Int, predicate: Int => Boolean): In
+t
+
+scala> countNumbersRec(Int.MaxValue, _ => true)
+val res12: Int = 2147483647
+
+scala> import fs2.*
+
+scala> def countNumbersStream(until: Int, predicate: Int => Bo
+olean): Long =
+     |   Stream.range(0, until).filter(predicate).compile.coun
+t.toInt
+     |
+def countNumbersStream(until: Int, predicate: Int => Boolean):
+ Long
+
+scala> def countNumbersStream(until: Int, predicate: Int => Bo
+olean): Long =
+     |   Stream.range(0, until).filter(predicate).compile.coun
+t
+     |
+def countNumbersStream(until: Int, predicate: Int => Boolean):
+ Long
+
+
+scala> countNumbersStream(4, _ % 2 == 0)
+val res13: Long = 2
+
+
+scala> countNumbersStream(Int.MaxValue, _ % 2 == 0)
+
+
+^C
+λ> scala-cli repl project.scala scala/Part1Introduction/Code1W
+hatAreStreams.sc
+Compiling project (Scala 3.7.0, JVM (21))
+Compiled project (Scala 3.7.0, JVM (21))
+Welcome to Scala 3.7.0 (21.0.4, Java OpenJDK 64-Bit Server VM)
+.
+Type in expressions for evaluation. Or try :help.
+
+scala> import fs2.*
+
+scala> val numbersList = List.range(0, Int.MaxValue)
+java.lang.OutOfMemoryError: Java heap space
+  at scala.collection.immutable.List.prependedAll(List.scala:1
+56)
+  at scala.collection.immutable.List$.from(List.scala:685)
+  at scala.collection.immutable.List$.from(List.scala:682)
+  at scala.collection.IterableFactory.range(Factory.scala:132)
+  at scala.collection.IterableFactory.range$(Factory.scala:132
+)
+  at scala.collection.immutable.List$.range(List.scala:682)
+  ... 26 elided
+
+scala> val numbers = Stream.range(0, Int.MaxValue)
+     |
+val numbers: fs2.Stream[[x] =>> fs2.Pure[x], Int] = Stream(..)
+
+scala> Stream.emits(List(0, 1, 2, 3))
+val res0: fs2.Stream[[x] =>> fs2.Pure[x], Int] = Stream(..)
+
+scala> res0.compile.count
+val res1: Long = 4
+
+scala> res0.compile.toList
+val res2: List[Int] = List(0, 1, 2, 3)
+
+scala>   Stream.emits(List.range(0, Int.MaxValue))
+Exception in thread "RMI TCP Connection(idle)" java.lang.OutOf
+MemoryError: Java heap space
+        at java.base/java.nio.DirectByteBuffer.<init>(DirectBy
+teBuffer.java:128)
+        at java.base/java.nio.ByteBuffer.allocateDirect(ByteBu
+ffer.java:360)
+        at java.base/sun.nio.ch.Util.getTemporaryDirectBuffer(
+Util.java:242)
+        at java.base/sun.nio.ch.NioSocketImpl.tryRead(NioSocke
+tImpl.java:253)
+        at java.base/sun.nio.ch.NioSocketImpl.timedRead(NioSoc
+ketImpl.java:274)
+        at java.base/sun.nio.ch.NioSocketImpl.implRead(NioSock
+etImpl.java:304)
+        at java.base/sun.nio.ch.NioSocketImpl.read(NioSocketIm
+pl.java:346)
+        at java.base/sun.nio.ch.NioSocketImpl$1.read(NioSocket
+Impl.java:796)
+        at java.base/java.net.Socket$SocketInputStream.read(So
+cket.java:1109)
+        at java.base/java.io.BufferedInputStream.fill(Buffered
+InputStream.java:291)
+        at java.base/java.io.BufferedInputStream.read1(Buffere
+dInputStream.java:347)
+        at java.base/java.io.BufferedInputStream.implRead(Buff
+eredInputStream.java:420)
+        at java.base/java.io.BufferedInputStream.read(Buffered
+InputStream.java:399)
+        at java.base/java.io.DataInputStream.readFully(DataInp
+utStream.java:208)
+        at java.base/java.io.DataInputStream.readInt(DataInput
+Stream.java:385)
+        at java.rmi/sun.rmi.transport.tcp.TCPTransport$Connect
+ionHandler.run0(TCPTransport.java:760)
+        at java.rmi/sun.rmi.transport.tcp.TCPTransport$Connect
+ionHandler.lambda$run$0(TCPTransport.java:721)
+        at java.rmi/sun.rmi.transport.tcp.TCPTransport$Connect
+ionHandler$$Lambda/0x000000011f510240.run(Unknown Source)
+        at java.base/java.security.AccessController.executePri
+vileged(AccessController.java:778)
+        at java.base/java.security.AccessController.doPrivileg
+ed(AccessController.java:400)
+        at java.rmi/sun.rmi.transport.tcp.TCPTransport$Connect
+ionHandler.run(TCPTransport.java:720)
+        at java.base/java.util.concurrent.ThreadPoolExecutor.r
+unWorker(ThreadPoolExecutor.java:1144)
+        at java.base/java.util.concurrent.ThreadPoolExecutor$W
+orker.run(ThreadPoolExecutor.java:642)
+        at java.base/java.lang.Thread.runWith(Thread.java:1596
+)
+        at java.base/java.lang.Thread.run(Thread.java:1583)
+java.lang.OutOfMemoryError: Java heap space
+  at scala.collection.immutable.List.prependedAll(List.scala:1
+56)
+  at scala.collection.immutable.List$.from(List.scala:685)
+  at scala.collection.immutable.List$.from(List.scala:682)
+  at scala.collection.IterableFactory.range(Factory.scala:132)
+  at scala.collection.IterableFactory.range$(Factory.scala:132
+)
+  at scala.collection.immutable.List$.range(List.scala:682)
+  ... 26 elided
+
+scala>   numbers.compile.toList
+
+
+Exception: java.lang.OutOfMemoryError thrown from the Uncaught
+ExceptionHandler in thread "RMI TCP Connection(idle)"
+Exception in thread "RMI TCP Connection(idle)" java.lang.OutOf
+MemoryError: Java heap space
+java.lang.OutOfMemoryError: Java heap space
+
+scala>
+
+
+
+
+
+
+scala> exit
+-- [E006] Not Found Error: -----------------------------------
+------------------
+1 |exit
+  |^^^^
+  |Not found: exit - did you mean Unit? or perhaps text or wai
+t?
+  |
+  | longer explanation available when compiling with `-explain
+`
+1 error found
+
+
+scala> exi
+-- [E006] Not Found Error: -----------------------------------
+------------------
+1 |exi
+  |^^^
+  |Not found: exi
+  |
+  | longer explanation available when compiling with `-explain
+`
+1 error found
+
+
+scala> quit
+-- [E006] Not Found Error: -----------------------------------
+------------------
+1 |quit
+  |^^^^
+  |Not found: quit - did you mean Unit? or perhaps wait?
+  |
+  | longer explanation available when compiling with `-explain
+`
+1 error found
+
+
+scala> :q
+λ> tmux capture-pane -pS -1000000 > part-1.log
+λ> scala-cli test project.scala scala/Part1Introduction/
+scala/Part1Introduction/.Code1WhatAreStreams.sc.~undo-tree~
+scala/Part1Introduction/.Code2IncrementalPipelines.sc.~undo-tr
+ee~
+scala/Part1Introduction/.Code2Operators.sc.~undo-tree~
+scala/Part1Introduction/.Code3IncrementalPipelines.sc.~undo-tr
+ee~
+scala/Part1Introduction/.Code3ReasoningAboutStreamProcessing.s
+c.~undo-tree~
+scala/Part1Introduction/.Code4CombiningOperators.sc.~undo-tree
+~
+scala/Part1Introduction/.Code5FanOutAndIn.sc.~undo-tree~
+scala/Part1Introduction/.Ex1WhatAreStreams.solutions.test.scal
+a.~undo-tree~
+scala/Part1Introduction/.Ex1WhatAreStreams.test.scala.~undo-tr
+ee~
+scala/Part1Introduction/.Ex2IncrementalPipelines.solutions.tes
+t.scala.~undo-tree~
+scala/Part1Introduction/.Ex2IncrementalPipelines.test.scala.~u
+ndo-tree~
+scala/Part1Introduction/.Ex3Combining.solutions.test.scala.~un
+do-tree~
+scala/Part1Introduction/.Ex4FanOutAndIn.solutions.test.scala.~
+undo-tree~
+scala/Part1Introduction/.Ex4FanOutAndIn.test.scala.~undo-tree~
+scala/Part1Introduction/.Fig1Evaluation.scala.~undo-tree~
+scala/Part1Introduction/.Fig2Take.scala.~undo-tree~
+scala/Part1Introduction/.Fig3CombiningZip.scala.~undo-tree~
+scala/Part1Introduction/.Fig3FlatMap.scala.~undo-tree~
+scala/Part1Introduction/.scala-build
+scala/Part1Introduction/Code1WhatAreStreams.sc
+scala/Part1Introduction/Code2IncrementalPipelines.sc
+scala/Part1Introduction/Code3ReasoningAboutStreamProcessing.sc
+scala/Part1Introduction/Code3ReasoningAboutStreamProcessing.sc
+~
+scala/Part1Introduction/Code4CombiningOperators.sc
+scala/Part1Introduction/Code5FanOutAndIn.sc
+scala/Part1Introduction/Ex1WhatAreStreams.solutions.test.scala
+scala/Part1Introduction/Ex1WhatAreStreams.solutions.test.scala
+~
+scala/Part1Introduction/Ex1WhatAreStreams.test.scala
+scala/Part1Introduction/Ex2IncrementalPipelines.solutions.test
+.scala
+scala/Part1Introduction/Ex2IncrementalPipelines.solutions.test
+.scala~
+scala/Part1Introduction/Ex2IncrementalPipelines.test.scala
+scala/Part1Introduction/Ex3Combining.solutions.test.scala
+scala/Part1Introduction/Ex3Combining.solutions.test.scala~
+λ> scala-cli test project.scala scala/Part1Introduction/Ex1Wha
+tAreStreams.solutions.test.scala
+Compiling project (Scala 3.7.0, JVM (21))
+Compiled project (Scala 3.7.0, JVM (21))
+Compiling project (test, Scala 3.7.0, JVM (21))
+Compiled project (test, Scala 3.7.0, JVM (21))
+Ex1WhatAreStreamsSolutions:
+  + get the first two numbers 0.064s
+  + get the seventh to the ninth number 0.005s
+  + get the first three odd numbers 0.004s
+  + get the 1000th number 0.032s
+  + get the sum of the first 10 numbers 0.004s
+λ> scala-cli test project.scala scala/Part1Introduction/Ex1Wha
+tAreStreams.solutions.test.scala
+Compiling project (test, Scala 3.7.0, JVM (21))
+Compiled project (test, Scala 3.7.0, JVM (21))
+0
+1
+Ex1WhatAreStreamsSolutions:
+  + get the first two numbers 0.075s
+λ> scala-cli test project.scala scala/Part1Introduction/Ex1Wha
+tAreStreams.solutions.test.scala
+Compiling project (test, Scala 3.7.0, JVM (21))
+Compiled project (test, Scala 3.7.0, JVM (21))
+The number is 0
+The number is 1
+Ex1WhatAreStreamsSolutions:
+  + get the first two numbers 0.071s
+λ> scala-cli test project.scala scala/Part1Introduction/Ex1Wha
+tAreStreams.solutions.test.scala
+Compiling project (test, Scala 3.7.0, JVM (21))
+Compiled project (test, Scala 3.7.0, JVM (21))
+The number is 0
+The number is 1
+Ex1WhatAreStreamsSolutions:
+  + get the first two numbers 0.067s
+  + get odd numbers less than six 0.006s
+λ>
+λ> scala-cli test project.scala scala/Part1Introduction/Ex1Wha
+tAreStreams.solutions.test.scala
+Compiling project (test, Scala 3.7.0, JVM (21))
+Compiled project (test, Scala 3.7.0, JVM (21))
+Ex1WhatAreStreamsSolutions:
+  + get odd numbers less than six 0.064s
+λ> scala-cli test project.scala scala/Part1Introduction/Ex1Wha
+tAreStreams.solutions.test.scala
+Compiling project (test, Scala 3.7.0, JVM (21))
+Compiled project (test, Scala 3.7.0, JVM (21))
+^Cλscala-cli repl project.scala
+Compiling project (Scala 3.7.0, JVM (21))
+Compiled project (Scala 3.7.0, JVM (21))
+Welcome to Scala 3.7.0 (21.0.4, Java OpenJDK 64-Bit Server VM)
+.
+Type in expressions for evaluation. Or try :help.
+
+scala> import fs2.*
+
+scala> def mostCommonInStream(ids: Stream[Pure, Long]): Long =
+ {
+     |   val initialCounts: Map[String, Long] = Map.empty
+     |   val finalCounts = ids
+     |     .fold(initialCounts) { (counts, id) =>
+     |       val previousCount = counts.getOrElse(id, 0)
+     |       counts + ((id, previousCount + 1))
+     |     }
+     |     .compile
+     |     .last
+     |     .getOrElse(initialCounts)
+     |   val (mostCommonId, _) = finalCounts.maxBy { case (_,
+count) => count }
+     |   mostCommonId
+     | }
+     |
+     |
+
+-- [E007] Type Mismatch Error: -------------------------------
+------------------
+5 |      val previousCount = counts.getOrElse(id, 0)
+  |                                           ^^
+  |                                           Found:    (id :
+Long)
+  |                                           Required: String
+  |
+  | longer explanation available when compiling with `-explain
+`
+-- [E007] Type Mismatch Error: -------------------------------
+------------------
+6 |      counts + ((id, previousCount + 1))
+  |                 ^^
+  |                 Found:    (id : Long)
+  |                 Required: String
+  |
+  | longer explanation available when compiling with `-explain
+`
+-- [E007] Type Mismatch Error: -------------------------------
+------------------
+12 |  mostCommonId
+   |  ^^^^^^^^^^^^
+   |  Found:    (mostCommonId : String)
+   |  Required: Long
+   |
+   | longer explanation available when compiling with `-explai
+n`
+3 errors found
+
+scala>
+
+scala> def mostCommonInStream(ids: Stream[Pure, String]): Stri
+ng = {
+     |   val initialCounts: Map[String, Int] = Map.empty
+     |   val finalCounts = ids
+     |     .fold(initialCounts) { (counts, id) =>
+     |       val previousCount = counts.getOrElse(id, 0)
+     |       counts + ((id, previousCount + 1))
+     |     }
+     |     .compile
+     |     .last
+     |     .getOrElse(initialCounts)
+     |   val (mostCommonId, _) = finalCounts.maxBy { case (_,
+count) => count }
+     |   mostCommonId
+     | }
+     |
+     |
+def mostCommonInStream(ids: fs2.Stream[fs2.Pure, String]): Str
+ing
+
+scala> val userIds: Stream[Pure, String] =
+     |   Stream.range(0, Int.MaxValue).map(i => s"u$i")
+     |
+val userIds: fs2.Stream[fs2.Pure, String] = Stream(..)
+
+scala> mostCommonInStream(userIds)
+^C
+λ> scala-cli repl project.scala
+Welcome to Scala 3.7.0 (21.0.4, Java OpenJDK 64-Bit Server VM)
+.
+Type in expressions for evaluation. Or try :help.
+
+scala> import fs2.*
+
+scala> def mostCommonInStream(ids: Stream[Pure, String]): Stri
+ng = {
+     |   val initialCounts: Map[String, Int] = Map.empty
+     |   val finalCounts = ids
+     |     .fold(initialCounts) { (counts, id) =>
+     |       val previousCount = counts.getOrElse(id, 0)
+     |       counts + ((id, previousCount + 1))
+     |     }
+     |     .compile
+     |     .last
+     |     .getOrElse(initialCounts)
+     |   val (mostCommonId, _) = finalCounts.maxBy { case (_,
+count) => count }
+     |   mostCommonId
+     | }
+     |
+     |
+def mostCommonInStream(ids: fs2.Stream[fs2.Pure, String]): Str
+ing
+
+scala> def mostCommonInStream(ids: Stream[Pure, String]): Stri
+ng = {
+     |   val initialCounts: Map[String, Int] = Map.empty
+     |   val finalCounts = ids
+     |     .fold(initialCounts) { (counts, id) =>
+     |       val previousCount = counts.getOrElse(id, 0)
+     |       counts + ((id, previousCount + 1))
+     |     }
+     |     .compile
+     |     .last
+     |     .getOrElse(initialCounts)
+     |   val (mostCommonId, _) = finalCounts.maxBy { case (_,
+count) => count }
+     |   mostCommonId
+     | }
+     |
+     |
+def mostCommonInStream(ids: fs2.Stream[fs2.Pure, String]): Str
+ing
+
+scala> def mostCommonInStream(ids: Stream[Pure, String]): Stri
+ng = {
+     |   val initialCounts: Map[String, Int] = Map.empty
+     |   val finalCounts = ids
+     |     .fold(initialCounts) { (counts, id) =>
+     |       val previousCount = counts.getOrElse(id, 0)
+     |       counts + ((id, previousCount + 1))
+     |     }
+     |     .compile
+     |     .last
+     |     .getOrElse(initialCounts)
+     |   val (mostCommonId, _) = finalCounts.maxBy { case (_,
+count) => count }
+     |   mostCommonId
+     | }
+     |
+     |
+def mostCommonInStream(ids: fs2.Stream[fs2.Pure, String]): Str
+ing
+
+scala> val userIds: Stream[Pure, String] =
+     |   Stream.range(0, Int.MaxValue).map(i => s"u$i")
+     |
+val userIds: fs2.Stream[fs2.Pure, String] = Stream(..)
+
+scala> mostCommonInStream(userIds)
+java.lang.OutOfMemoryError: Java heap space
+  at fs2.Pull$Succeeded.map(Pull.scala:660)
+  at fs2.Pull$Succeeded.map(Pull.scala:658)
+  at fs2.Pull$$anon$4.cont(Pull.scala:263)
+  at fs2.Pull$BindBind.cont(Pull.scala:734)
+  at fs2.Pull$ContP.apply(Pull.scala:682)
+  at fs2.Pull$ContP.apply$(Pull.scala:681)
+  at fs2.Pull$Bind.apply(Pull.scala:690)
+  at fs2.Pull$Bind.apply(Pull.scala:690)
+  at fs2.Pull$UnconsRunR$1.out$$anonfun$2(Pull.scala:1019)
+  at fs2.Pull$UnconsRunR$1$$Lambda/0x00000001276dd258.apply(Un
+known Source)
+  at fs2.Pull$.interruptGuard$1$$anonfun$1(Pull.scala:952)
+  at fs2.Pull$$$Lambda/0x00000001276c9410.apply(Unknown Source
+)
+  at cats.effect.SyncIO.flatMapK$1(SyncIO.scala:368)
+  at cats.effect.SyncIO.succeeded$1(SyncIO.scala:309)
+  at cats.effect.SyncIO.runLoop$1(SyncIO.scala:238)
+  at cats.effect.SyncIO.unsafeRunSync(SyncIO.scala:383)
+  at fs2.Compiler$$anon$5.apply(Compiler.scala:136)
+  at fs2.Stream$CompileOps.foldChunks(Stream.scala:5226)
+  at fs2.Stream$CompileOps.last(Stream.scala:5267)
+  at rs$line$4$.mostCommonInStream(rs$line$4:8)
+  ... 12 elided
+
+
+scala>   def mostCommon(k: Int, ids: Stream[Pure, String]): St
+ring = {
+     |     // Replace this implementation with the Misra Gries
+ summary.
+     |     val initialCounts: Map[String, Int] = Map.empty
+     |     val finalCounts = ids
+     |       .fold(initialCounts) { (counts, id) =>
+     |         counts.get(id) match {
+     |           case Some(previousCount)       => counts + ((
+id, previousCount + 1))
+     |           case None if (counts.size < k) => counts + ((
+id, 1))
+     |           case None =>
+     |             counts.collect {
+     |               case (id, count) if count > 1 => (id, cou
+nt - 1)
+     |             }
+     |         }
+     |       }
+     |       .compile
+     |       .last
+     |       .getOrElse(initialCounts)
+     |     val (mostCommonId, _) = finalCounts.maxBy { case (_
+, count) => count }
+     |     mostCommonId
+     |   }
+     |
+     |
+def mostCommon(k: Int, ids: fs2.Stream[fs2.Pure, String]): Str
+ing
+
+scala>   val userIds: Stream[Pure, String] =
+     |     Stream
+     |       .range(0, Int.MaxValue)
+     |       .map(id => s"u$id")
+     |
+val userIds: fs2.Stream[fs2.Pure, String] = Stream(..)
+
+scala> userIds.take(10).toLis
+t
+
+-- [E008] Not Found Error: -----------------------------------
+------------------
+1 |userIds.take(10).toLis
+  |^^^^^^^^^^^^^^^^^^^^^^
+  |value toLis is not a member of fs2.Stream[fs2.Pure, String]
+1 error found
+
+scala> t
+
+-- [E006] Not Found Error: -----------------------------------
+------------------
+1 |t
+  |^
+  |Not found: t
+  |
+  | longer explanation available when compiling with `-explain
+`
+1 error found
+
+scala>
+
+scala> userIds.take(10).toList
+val res1: List[String] = List(u0, u1, u2, u3, u4, u5, u6, u7,
+u8, u9)
+
+scala> mostCommon(userIds)
+-- [E007] Type Mismatch Error: -------------------------------
+------------------
+1 |mostCommon(userIds)
+  |           ^^^^^^^
+  |           Found:    (userIds : fs2.Stream[fs2.Pure, String
+])
+  |           Required: Int
+  |
+  | longer explanation available when compiling with `-explain
+`
+1 error found
+
+scala> mostCommon(100, userIds)
+^C
+λ> scala-cli repl project.scala Welcome to Scala 3.7.0 (21.0.4
+, Java OpenJDK 64-Bit Server VM).
+Type in expressions for evaluation. Or try :help.
+
+
+scala> import fs2.*
+
+scala>   def mostCommon(k: Int, ids: Stream[Pure, String]): St
+ring = {
+     |     // Replace this implementation with the Misra Gries
+ summary.
+     |     val initialCounts: Map[String, Int] = Map.empty
+     |     val finalCounts = ids
+     |       .fold(initialCounts) { (counts, id) =>
+     |         counts.get(id) match {
+     |           case Some(previousCount)       => counts + ((
+id, previousCount + 1))
+     |           case None if (counts.size < k) => counts + ((
+id, 1))
+     |           case None =>
+     |             counts.collect {
+     |               case (id, count) if count > 1 => (id, cou
+nt - 1)
+     |             }
+     |         }
+     |       }
+     |       .compile
+     |       .last
+     |       .getOrElse(initialCounts)
+     |     val (mostCommonId, _) = finalCounts.maxBy { case (_
+, count) => count }
+     |     mostCommonId
+     |   }
+     |
+     |
+def mostCommon(k: Int, ids: fs2.Stream[fs2.Pure, String]): Str
+ing
+
+scala>   val userIds: Stream[Pure, String] =
+     |     Stream
+     |       .range(0, Int.MaxValue)
+     |       .map(id => s"u$id")
+     |
+val userIds: fs2.Stream[fs2.Pure, String] = Stream(..)
+
+scala> mostCommon(userIds)
+-- [E007] Type Mismatch Error: -------------------------------
+------------------
+1 |mostCommon(userIds)
+  |           ^^^^^^^
+  |           Found:    (userIds : fs2.Stream[fs2.Pure, String
+])
+  |           Required: Int
+  |
+  | longer explanation available when compiling with `-explain
+`
+1 error found
+
+scala> mostCommon(100, userIds)
+^C
+λ> tmux capture-pane -pS - > part-2.log
+

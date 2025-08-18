@@ -1,0 +1,1556 @@
+
+
+zainab@beagle:~/dev/zainab/blog/ > cd ../../zainab-ali/functio
+nal-stream-processing-workshop
+zainab@beagle:~/dev/zainab-ali/functional-stream-processing-wo
+rkshop/ > nix develop
+warning: Git tree '/Users/zainab/dev/zainab-ali/functional-str
+eam-processing-workshop' is dirty
+λ> pwd
+/Users/zainab/dev/zainab-ali/functional-stream-processing-work
+shop
+λ> scala-cli
+
+^Cλ> scala-cli compile project.scala scala/Part1Introduction/C
+ode1WhatAreStreams.sc
+Compiling project (Scala 3.7.0, JVM (21))
+Compiled project (Scala 3.7.0, JVM (21))
+λ> scala-cli repl project.scala scala/Part1Introduction/Code1W
+hatAreStreams.sc
+
+Welcome to Scala 3.7.0 (21.0.4, Java OpenJDK 64-Bit Server VM)
+.
+Type in expressions for evaluation. Or try :help.
+
+
+scala> def countNumbers(until: Int, predicate: Int => Boolean)
+: Int = ???
+def countNumbers(until: Int, predicate: Int => Boolean): Int
+
+scala> countNumbers(4, true)
+-- [E007] Type Mismatch Error: -------------------------------
+------------------
+1 |countNumbers(4, true)
+  |                ^^^^
+  |                Found:    (true : Boolean)
+  |                Required: Int => Boolean
+  |
+  | longer explanation available when compiling with `-explain
+`
+1 error found
+
+scala> countNumbers(4, _ % 2)
+-- [E007] Type Mismatch Error: -------------------------------
+------------------
+1 |countNumbers(4, _ % 2)
+  |                ^^^^^
+  |                Found:    Int
+  |                Required: Boolean
+  |
+  | longer explanation available when compiling with `-explain
+`
+1 error found
+
+
+scala> def countNumbersList(until: Int, predicate: Int => Bool
+ean): Int =
+     |   List.range(0, until).filter(predicate).size
+     |
+def countNumbersList(until: Int, predicate: Int => Boolean): I
+nt
+
+
+scala> List.range(0, 4)
+val res0: List[Int] = List(0, 1, 2, 3)
+
+
+scala> List.range(0, 4).filter(_ % 2)
+-- [E007] Type Mismatch Error: -------------------------------
+------------------
+1 |List.range(0, 4).filter(_ % 2)
+  |                        ^^^^^
+  |                        Found:    Int
+  |                        Required: Boolean
+  |
+  | longer explanation available when compiling with `-explain
+`
+1 error found
+
+
+scala> List.range(0, 4).filter(_ % 2 == 2)
+
+val res1: List[Int] = List()
+
+
+scala> List.range(0, 4).filter(_ % 2 == 0)
+
+val res2: List[Int] = List(0, 2)
+
+
+scala> List.range(0, 4).filter(_ % 2 == 0).size
+val res3: Int = 2
+
+
+scala> List.range(0, 100).filter(_ % 2 == 0).size
+
+val res4: Int = 50
+
+
+scala> countNumbersList(100, _ % 2 == 0)
+val res5: Int = 50
+                                scala> countNumbersList(Int.Ma
+scala> countNumbersList(Int.MaxValue, _ % 2 == 0)
+Exception in thread "RMI TCP Connection(idle)" java.lang.OutOf
+MemoryError: Java heap space
+        at java.rmi/sun.rmi.transport.tcp.TCPTransport.handleM
+essages(TCPTransport.java:597)
+        at java.rmi/sun.rmi.transport.tcp.TCPTransport$Connect
+ionHandler.run0(TCPTransport.java:844)
+        at java.rmi/sun.rmi.transport.tcp.TCPTransport$Connect
+ionHandler.lambda$run$0(TCPTransport.java:721)
+        at java.rmi/sun.rmi.transport.tcp.TCPTransport$Connect
+ionHandler$$Lambda/0x000000011e6e4060.run(Unknown Source)
+        at java.base/java.security.AccessController.executePri
+vileged(AccessController.java:778)
+        at java.base/java.security.AccessController.doPrivileg
+ed(AccessController.java:400)
+        at java.rmi/sun.rmi.transport.tcp.TCPTransport$Connect
+ionHandler.run(TCPTransport.java:720)
+        at java.base/java.util.concurrent.ThreadPoolExecutor.r
+unWorker(ThreadPoolExecutor.java:1144)
+        at java.base/java.util.concurrent.ThreadPoolExecutor$W
+orker.run(ThreadPoolExecutor.java:642)
+        at java.base/java.lang.Thread.runWith(Thread.java:1596
+)
+        at java.base/java.lang.Thread.run(Thread.java:1583)
+java.lang.OutOfMemoryError: Java heap space
+  at scala.collection.immutable.List.prependedAll(List.scala:1
+56)
+  at scala.collection.immutable.List$.from(List.scala:685)
+  at scala.collection.immutable.List$.from(List.scala:682)
+  at scala.collection.IterableFactory.range(Factory.scala:132)
+  at scala.collection.IterableFactory.range$(Factory.scala:132
+)
+  at scala.collection.immutable.List$.range(List.scala:682)
+  at rs$line$2$.countNumbersList(rs$line$2:2)
+  ... 25 elided
+
+
+scala>
+
+scala> def countNumbersLoop(until: Int, predicate: Int => Bool
+ean): Int = {
+     |   var count: Int = 0
+     |   var i: Int = 0
+     |   while (i < until) {
+     |     if (predicate(i)) count = count + 1
+     |     i = i + 1
+     |   }
+     |   count
+     | }
+     |
+     |
+def countNumbersLoop(until: Int, predicate: Int => Boolean): I
+nt
+
+scala> countNumbersLoop(4, _ % 2 == 0)
+val res7: Int = 2
+
+scala> countNumbersLoop(Int.MaxValue, _ => true)
+val res8: Int = 2147483647
+
+scala> countNumbersLoop(Int.MaxValue, _ => true)
+val res9: Int = 2147483647
+
+scala> def countNumbersRec(until: Int, predicate: Int => Boole
+an): Int =
+     | ???
+def countNumbersRec(until: Int, predicate: Int => Boolean): In
+t
+
+scala>
+     | /* Explicit recursion is also not composable */
+     | def countNumbersRec(until: Int, predicate: Int => Boole
+an): Int = {
+     |   @scala.annotation.tailrec
+     |   def go(count: Int, i: Int): Int = {
+     |     if (i < until) {
+     |       if (predicate(i)) {
+     |         go(count + 1, i + 1)
+     |       } else {
+     |         go(count, i + 1)
+     |       }
+     |     } else {
+     |       count
+     |     }
+     |   }
+     |   go(0, 0)
+     | }
+def countNumbersRec(until: Int, predicate: Int => Boolean): In
+t
+
+scala> countNumbersRec(Int.MaxValue, _ => true)
+val res10: Int = 2147483647
+
+scala> countNumbersRec(Int.MaxValue, _ => true)
+val res11: Int = 2147483647
+
+scala> def countNumbersRec(until: Int, predicate: Int => Boole
+an): Int = {
+     |   // @scala.annotation.tailrec
+     |   def go(count: Int, i: Int): Int = {
+     |     if (i < until) {
+     |       if (predicate(i)) {
+     |         go(count + 1, i + 1)
+     |       } else {
+     |         go(count, i + 1)
+     |       }
+     |     } else {
+     |       count
+     |     }
+     |   }
+     |   go(0, 0)
+     | }
+     |
+     |
+def countNumbersRec(until: Int, predicate: Int => Boolean): In
+t
+
+scala> countNumbersRec(Int.MaxValue, _ => true)
+val res12: Int = 2147483647
+
+scala> import fs2.*
+
+scala> def countNumbersStream(until: Int, predicate: Int => Bo
+olean): Long =
+     |   Stream.range(0, until).filter(predicate).compile.coun
+t.toInt
+     |
+def countNumbersStream(until: Int, predicate: Int => Boolean):
+ Long
+
+scala> def countNumbersStream(until: Int, predicate: Int => Bo
+olean): Long =
+     |   Stream.range(0, until).filter(predicate).compile.coun
+t
+     |
+def countNumbersStream(until: Int, predicate: Int => Boolean):
+ Long
+
+
+scala> countNumbersStream(4, _ % 2 == 0)
+val res13: Long = 2
+
+
+scala> countNumbersStream(Int.MaxValue, _ % 2 == 0)
+
+
+^C
+λ> scala-cli repl project.scala scala/Part1Introduction/Code1W
+hatAreStreams.sc
+Compiling project (Scala 3.7.0, JVM (21))
+Compiled project (Scala 3.7.0, JVM (21))
+Welcome to Scala 3.7.0 (21.0.4, Java OpenJDK 64-Bit Server VM)
+.
+Type in expressions for evaluation. Or try :help.
+
+scala> import fs2.*
+
+scala> val numbersList = List.range(0, Int.MaxValue)
+java.lang.OutOfMemoryError: Java heap space
+  at scala.collection.immutable.List.prependedAll(List.scala:1
+56)
+  at scala.collection.immutable.List$.from(List.scala:685)
+  at scala.collection.immutable.List$.from(List.scala:682)
+  at scala.collection.IterableFactory.range(Factory.scala:132)
+  at scala.collection.IterableFactory.range$(Factory.scala:132
+)
+  at scala.collection.immutable.List$.range(List.scala:682)
+  ... 26 elided
+
+scala> val numbers = Stream.range(0, Int.MaxValue)
+     |
+val numbers: fs2.Stream[[x] =>> fs2.Pure[x], Int] = Stream(..)
+
+scala> Stream.emits(List(0, 1, 2, 3))
+val res0: fs2.Stream[[x] =>> fs2.Pure[x], Int] = Stream(..)
+
+scala> res0.compile.count
+val res1: Long = 4
+
+scala> res0.compile.toList
+val res2: List[Int] = List(0, 1, 2, 3)
+
+scala>   Stream.emits(List.range(0, Int.MaxValue))
+Exception in thread "RMI TCP Connection(idle)" java.lang.OutOf
+MemoryError: Java heap space
+        at java.base/java.nio.DirectByteBuffer.<init>(DirectBy
+teBuffer.java:128)
+        at java.base/java.nio.ByteBuffer.allocateDirect(ByteBu
+ffer.java:360)
+        at java.base/sun.nio.ch.Util.getTemporaryDirectBuffer(
+Util.java:242)
+        at java.base/sun.nio.ch.NioSocketImpl.tryRead(NioSocke
+tImpl.java:253)
+        at java.base/sun.nio.ch.NioSocketImpl.timedRead(NioSoc
+ketImpl.java:274)
+        at java.base/sun.nio.ch.NioSocketImpl.implRead(NioSock
+etImpl.java:304)
+        at java.base/sun.nio.ch.NioSocketImpl.read(NioSocketIm
+pl.java:346)
+        at java.base/sun.nio.ch.NioSocketImpl$1.read(NioSocket
+Impl.java:796)
+        at java.base/java.net.Socket$SocketInputStream.read(So
+cket.java:1109)
+        at java.base/java.io.BufferedInputStream.fill(Buffered
+InputStream.java:291)
+        at java.base/java.io.BufferedInputStream.read1(Buffere
+dInputStream.java:347)
+        at java.base/java.io.BufferedInputStream.implRead(Buff
+eredInputStream.java:420)
+        at java.base/java.io.BufferedInputStream.read(Buffered
+InputStream.java:399)
+        at java.base/java.io.DataInputStream.readFully(DataInp
+utStream.java:208)
+        at java.base/java.io.DataInputStream.readInt(DataInput
+Stream.java:385)
+        at java.rmi/sun.rmi.transport.tcp.TCPTransport$Connect
+ionHandler.run0(TCPTransport.java:760)
+        at java.rmi/sun.rmi.transport.tcp.TCPTransport$Connect
+ionHandler.lambda$run$0(TCPTransport.java:721)
+        at java.rmi/sun.rmi.transport.tcp.TCPTransport$Connect
+ionHandler$$Lambda/0x000000011f510240.run(Unknown Source)
+        at java.base/java.security.AccessController.executePri
+vileged(AccessController.java:778)
+        at java.base/java.security.AccessController.doPrivileg
+ed(AccessController.java:400)
+        at java.rmi/sun.rmi.transport.tcp.TCPTransport$Connect
+ionHandler.run(TCPTransport.java:720)
+        at java.base/java.util.concurrent.ThreadPoolExecutor.r
+unWorker(ThreadPoolExecutor.java:1144)
+        at java.base/java.util.concurrent.ThreadPoolExecutor$W
+orker.run(ThreadPoolExecutor.java:642)
+        at java.base/java.lang.Thread.runWith(Thread.java:1596
+)
+        at java.base/java.lang.Thread.run(Thread.java:1583)
+java.lang.OutOfMemoryError: Java heap space
+  at scala.collection.immutable.List.prependedAll(List.scala:1
+56)
+  at scala.collection.immutable.List$.from(List.scala:685)
+  at scala.collection.immutable.List$.from(List.scala:682)
+  at scala.collection.IterableFactory.range(Factory.scala:132)
+  at scala.collection.IterableFactory.range$(Factory.scala:132
+)
+  at scala.collection.immutable.List$.range(List.scala:682)
+  ... 26 elided
+
+scala>   numbers.compile.toList
+
+
+Exception: java.lang.OutOfMemoryError thrown from the Uncaught
+ExceptionHandler in thread "RMI TCP Connection(idle)"
+Exception in thread "RMI TCP Connection(idle)" java.lang.OutOf
+MemoryError: Java heap space
+java.lang.OutOfMemoryError: Java heap space
+
+scala>
+
+
+
+
+
+
+scala> exit
+-- [E006] Not Found Error: -----------------------------------
+------------------
+1 |exit
+  |^^^^
+  |Not found: exit - did you mean Unit? or perhaps text or wai
+t?
+  |
+  | longer explanation available when compiling with `-explain
+`
+1 error found
+
+
+scala> exi
+-- [E006] Not Found Error: -----------------------------------
+------------------
+1 |exi
+  |^^^
+  |Not found: exi
+  |
+  | longer explanation available when compiling with `-explain
+`
+1 error found
+
+
+scala> quit
+-- [E006] Not Found Error: -----------------------------------
+------------------
+1 |quit
+  |^^^^
+  |Not found: quit - did you mean Unit? or perhaps wait?
+  |
+  | longer explanation available when compiling with `-explain
+`
+1 error found
+
+
+scala> :q
+λ> tmux capture-pane -pS -1000000 > part-1.log
+λ> scala-cli test project.scala scala/Part1Introduction/
+scala/Part1Introduction/.Code1WhatAreStreams.sc.~undo-tree~
+scala/Part1Introduction/.Code2IncrementalPipelines.sc.~undo-tr
+ee~
+scala/Part1Introduction/.Code2Operators.sc.~undo-tree~
+scala/Part1Introduction/.Code3IncrementalPipelines.sc.~undo-tr
+ee~
+scala/Part1Introduction/.Code3ReasoningAboutStreamProcessing.s
+c.~undo-tree~
+scala/Part1Introduction/.Code4CombiningOperators.sc.~undo-tree
+~
+scala/Part1Introduction/.Code5FanOutAndIn.sc.~undo-tree~
+scala/Part1Introduction/.Ex1WhatAreStreams.solutions.test.scal
+a.~undo-tree~
+scala/Part1Introduction/.Ex1WhatAreStreams.test.scala.~undo-tr
+ee~
+scala/Part1Introduction/.Ex2IncrementalPipelines.solutions.tes
+t.scala.~undo-tree~
+scala/Part1Introduction/.Ex2IncrementalPipelines.test.scala.~u
+ndo-tree~
+scala/Part1Introduction/.Ex3Combining.solutions.test.scala.~un
+do-tree~
+scala/Part1Introduction/.Ex4FanOutAndIn.solutions.test.scala.~
+undo-tree~
+scala/Part1Introduction/.Ex4FanOutAndIn.test.scala.~undo-tree~
+scala/Part1Introduction/.Fig1Evaluation.scala.~undo-tree~
+scala/Part1Introduction/.Fig2Take.scala.~undo-tree~
+scala/Part1Introduction/.Fig3CombiningZip.scala.~undo-tree~
+scala/Part1Introduction/.Fig3FlatMap.scala.~undo-tree~
+scala/Part1Introduction/.scala-build
+scala/Part1Introduction/Code1WhatAreStreams.sc
+scala/Part1Introduction/Code2IncrementalPipelines.sc
+scala/Part1Introduction/Code3ReasoningAboutStreamProcessing.sc
+scala/Part1Introduction/Code3ReasoningAboutStreamProcessing.sc
+~
+scala/Part1Introduction/Code4CombiningOperators.sc
+scala/Part1Introduction/Code5FanOutAndIn.sc
+scala/Part1Introduction/Ex1WhatAreStreams.solutions.test.scala
+scala/Part1Introduction/Ex1WhatAreStreams.solutions.test.scala
+~
+scala/Part1Introduction/Ex1WhatAreStreams.test.scala
+scala/Part1Introduction/Ex2IncrementalPipelines.solutions.test
+.scala
+scala/Part1Introduction/Ex2IncrementalPipelines.solutions.test
+.scala~
+scala/Part1Introduction/Ex2IncrementalPipelines.test.scala
+scala/Part1Introduction/Ex3Combining.solutions.test.scala
+scala/Part1Introduction/Ex3Combining.solutions.test.scala~
+λ> scala-cli test project.scala scala/Part1Introduction/Ex1Wha
+tAreStreams.solutions.test.scala
+Compiling project (Scala 3.7.0, JVM (21))
+Compiled project (Scala 3.7.0, JVM (21))
+Compiling project (test, Scala 3.7.0, JVM (21))
+Compiled project (test, Scala 3.7.0, JVM (21))
+Ex1WhatAreStreamsSolutions:
+  + get the first two numbers 0.064s
+  + get the seventh to the ninth number 0.005s
+  + get the first three odd numbers 0.004s
+  + get the 1000th number 0.032s
+  + get the sum of the first 10 numbers 0.004s
+λ> scala-cli test project.scala scala/Part1Introduction/Ex1Wha
+tAreStreams.solutions.test.scala
+Compiling project (test, Scala 3.7.0, JVM (21))
+Compiled project (test, Scala 3.7.0, JVM (21))
+0
+1
+Ex1WhatAreStreamsSolutions:
+  + get the first two numbers 0.075s
+λ> scala-cli test project.scala scala/Part1Introduction/Ex1Wha
+tAreStreams.solutions.test.scala
+Compiling project (test, Scala 3.7.0, JVM (21))
+Compiled project (test, Scala 3.7.0, JVM (21))
+The number is 0
+The number is 1
+Ex1WhatAreStreamsSolutions:
+  + get the first two numbers 0.071s
+λ> scala-cli test project.scala scala/Part1Introduction/Ex1Wha
+tAreStreams.solutions.test.scala
+Compiling project (test, Scala 3.7.0, JVM (21))
+Compiled project (test, Scala 3.7.0, JVM (21))
+The number is 0
+The number is 1
+Ex1WhatAreStreamsSolutions:
+  + get the first two numbers 0.067s
+  + get odd numbers less than six 0.006s
+λ>
+λ> scala-cli test project.scala scala/Part1Introduction/Ex1Wha
+tAreStreams.solutions.test.scala
+Compiling project (test, Scala 3.7.0, JVM (21))
+Compiled project (test, Scala 3.7.0, JVM (21))
+Ex1WhatAreStreamsSolutions:
+  + get odd numbers less than six 0.064s
+λ> scala-cli test project.scala scala/Part1Introduction/Ex1Wha
+tAreStreams.solutions.test.scala
+Compiling project (test, Scala 3.7.0, JVM (21))
+Compiled project (test, Scala 3.7.0, JVM (21))
+^Cλscala-cli repl project.scala
+Compiling project (Scala 3.7.0, JVM (21))
+Compiled project (Scala 3.7.0, JVM (21))
+Welcome to Scala 3.7.0 (21.0.4, Java OpenJDK 64-Bit Server VM)
+.
+Type in expressions for evaluation. Or try :help.
+
+scala> import fs2.*
+
+scala> def mostCommonInStream(ids: Stream[Pure, Long]): Long =
+ {
+     |   val initialCounts: Map[String, Long] = Map.empty
+     |   val finalCounts = ids
+     |     .fold(initialCounts) { (counts, id) =>
+     |       val previousCount = counts.getOrElse(id, 0)
+     |       counts + ((id, previousCount + 1))
+     |     }
+     |     .compile
+     |     .last
+     |     .getOrElse(initialCounts)
+     |   val (mostCommonId, _) = finalCounts.maxBy { case (_,
+count) => count }
+     |   mostCommonId
+     | }
+     |
+     |
+
+-- [E007] Type Mismatch Error: -------------------------------
+------------------
+5 |      val previousCount = counts.getOrElse(id, 0)
+  |                                           ^^
+  |                                           Found:    (id :
+Long)
+  |                                           Required: String
+  |
+  | longer explanation available when compiling with `-explain
+`
+-- [E007] Type Mismatch Error: -------------------------------
+------------------
+6 |      counts + ((id, previousCount + 1))
+  |                 ^^
+  |                 Found:    (id : Long)
+  |                 Required: String
+  |
+  | longer explanation available when compiling with `-explain
+`
+-- [E007] Type Mismatch Error: -------------------------------
+------------------
+12 |  mostCommonId
+   |  ^^^^^^^^^^^^
+   |  Found:    (mostCommonId : String)
+   |  Required: Long
+   |
+   | longer explanation available when compiling with `-explai
+n`
+3 errors found
+
+scala>
+
+scala> def mostCommonInStream(ids: Stream[Pure, String]): Stri
+ng = {
+     |   val initialCounts: Map[String, Int] = Map.empty
+     |   val finalCounts = ids
+     |     .fold(initialCounts) { (counts, id) =>
+     |       val previousCount = counts.getOrElse(id, 0)
+     |       counts + ((id, previousCount + 1))
+     |     }
+     |     .compile
+     |     .last
+     |     .getOrElse(initialCounts)
+     |   val (mostCommonId, _) = finalCounts.maxBy { case (_,
+count) => count }
+     |   mostCommonId
+     | }
+     |
+     |
+def mostCommonInStream(ids: fs2.Stream[fs2.Pure, String]): Str
+ing
+
+scala> val userIds: Stream[Pure, String] =
+     |   Stream.range(0, Int.MaxValue).map(i => s"u$i")
+     |
+val userIds: fs2.Stream[fs2.Pure, String] = Stream(..)
+
+scala> mostCommonInStream(userIds)
+^C
+λ> scala-cli repl project.scala
+Welcome to Scala 3.7.0 (21.0.4, Java OpenJDK 64-Bit Server VM)
+.
+Type in expressions for evaluation. Or try :help.
+
+scala> import fs2.*
+
+scala> def mostCommonInStream(ids: Stream[Pure, String]): Stri
+ng = {
+     |   val initialCounts: Map[String, Int] = Map.empty
+     |   val finalCounts = ids
+     |     .fold(initialCounts) { (counts, id) =>
+     |       val previousCount = counts.getOrElse(id, 0)
+     |       counts + ((id, previousCount + 1))
+     |     }
+     |     .compile
+     |     .last
+     |     .getOrElse(initialCounts)
+     |   val (mostCommonId, _) = finalCounts.maxBy { case (_,
+count) => count }
+     |   mostCommonId
+     | }
+     |
+     |
+def mostCommonInStream(ids: fs2.Stream[fs2.Pure, String]): Str
+ing
+
+scala> def mostCommonInStream(ids: Stream[Pure, String]): Stri
+ng = {
+     |   val initialCounts: Map[String, Int] = Map.empty
+     |   val finalCounts = ids
+     |     .fold(initialCounts) { (counts, id) =>
+     |       val previousCount = counts.getOrElse(id, 0)
+     |       counts + ((id, previousCount + 1))
+     |     }
+     |     .compile
+     |     .last
+     |     .getOrElse(initialCounts)
+     |   val (mostCommonId, _) = finalCounts.maxBy { case (_,
+count) => count }
+     |   mostCommonId
+     | }
+     |
+     |
+def mostCommonInStream(ids: fs2.Stream[fs2.Pure, String]): Str
+ing
+
+scala> def mostCommonInStream(ids: Stream[Pure, String]): Stri
+ng = {
+     |   val initialCounts: Map[String, Int] = Map.empty
+     |   val finalCounts = ids
+     |     .fold(initialCounts) { (counts, id) =>
+     |       val previousCount = counts.getOrElse(id, 0)
+     |       counts + ((id, previousCount + 1))
+     |     }
+     |     .compile
+     |     .last
+     |     .getOrElse(initialCounts)
+     |   val (mostCommonId, _) = finalCounts.maxBy { case (_,
+count) => count }
+     |   mostCommonId
+     | }
+     |
+     |
+def mostCommonInStream(ids: fs2.Stream[fs2.Pure, String]): Str
+ing
+
+scala> val userIds: Stream[Pure, String] =
+     |   Stream.range(0, Int.MaxValue).map(i => s"u$i")
+     |
+val userIds: fs2.Stream[fs2.Pure, String] = Stream(..)
+
+scala> mostCommonInStream(userIds)
+java.lang.OutOfMemoryError: Java heap space
+  at fs2.Pull$Succeeded.map(Pull.scala:660)
+  at fs2.Pull$Succeeded.map(Pull.scala:658)
+  at fs2.Pull$$anon$4.cont(Pull.scala:263)
+  at fs2.Pull$BindBind.cont(Pull.scala:734)
+  at fs2.Pull$ContP.apply(Pull.scala:682)
+  at fs2.Pull$ContP.apply$(Pull.scala:681)
+  at fs2.Pull$Bind.apply(Pull.scala:690)
+  at fs2.Pull$Bind.apply(Pull.scala:690)
+  at fs2.Pull$UnconsRunR$1.out$$anonfun$2(Pull.scala:1019)
+  at fs2.Pull$UnconsRunR$1$$Lambda/0x00000001276dd258.apply(Un
+known Source)
+  at fs2.Pull$.interruptGuard$1$$anonfun$1(Pull.scala:952)
+  at fs2.Pull$$$Lambda/0x00000001276c9410.apply(Unknown Source
+)
+  at cats.effect.SyncIO.flatMapK$1(SyncIO.scala:368)
+  at cats.effect.SyncIO.succeeded$1(SyncIO.scala:309)
+  at cats.effect.SyncIO.runLoop$1(SyncIO.scala:238)
+  at cats.effect.SyncIO.unsafeRunSync(SyncIO.scala:383)
+  at fs2.Compiler$$anon$5.apply(Compiler.scala:136)
+  at fs2.Stream$CompileOps.foldChunks(Stream.scala:5226)
+  at fs2.Stream$CompileOps.last(Stream.scala:5267)
+  at rs$line$4$.mostCommonInStream(rs$line$4:8)
+  ... 12 elided
+
+
+scala>   def mostCommon(k: Int, ids: Stream[Pure, String]): St
+ring = {
+     |     // Replace this implementation with the Misra Gries
+ summary.
+     |     val initialCounts: Map[String, Int] = Map.empty
+     |     val finalCounts = ids
+     |       .fold(initialCounts) { (counts, id) =>
+     |         counts.get(id) match {
+     |           case Some(previousCount)       => counts + ((
+id, previousCount + 1))
+     |           case None if (counts.size < k) => counts + ((
+id, 1))
+     |           case None =>
+     |             counts.collect {
+     |               case (id, count) if count > 1 => (id, cou
+nt - 1)
+     |             }
+     |         }
+     |       }
+     |       .compile
+     |       .last
+     |       .getOrElse(initialCounts)
+     |     val (mostCommonId, _) = finalCounts.maxBy { case (_
+, count) => count }
+     |     mostCommonId
+     |   }
+     |
+     |
+def mostCommon(k: Int, ids: fs2.Stream[fs2.Pure, String]): Str
+ing
+
+scala>   val userIds: Stream[Pure, String] =
+     |     Stream
+     |       .range(0, Int.MaxValue)
+     |       .map(id => s"u$id")
+     |
+val userIds: fs2.Stream[fs2.Pure, String] = Stream(..)
+
+scala> userIds.take(10).toLis
+t
+
+-- [E008] Not Found Error: -----------------------------------
+------------------
+1 |userIds.take(10).toLis
+  |^^^^^^^^^^^^^^^^^^^^^^
+  |value toLis is not a member of fs2.Stream[fs2.Pure, String]
+1 error found
+
+scala> t
+
+-- [E006] Not Found Error: -----------------------------------
+------------------
+1 |t
+  |^
+  |Not found: t
+  |
+  | longer explanation available when compiling with `-explain
+`
+1 error found
+
+scala>
+
+scala> userIds.take(10).toList
+val res1: List[String] = List(u0, u1, u2, u3, u4, u5, u6, u7,
+u8, u9)
+
+scala> mostCommon(userIds)
+-- [E007] Type Mismatch Error: -------------------------------
+------------------
+1 |mostCommon(userIds)
+  |           ^^^^^^^
+  |           Found:    (userIds : fs2.Stream[fs2.Pure, String
+])
+  |           Required: Int
+  |
+  | longer explanation available when compiling with `-explain
+`
+1 error found
+
+scala> mostCommon(100, userIds)
+^C
+λ> scala-cli repl project.scala Welcome to Scala 3.7.0 (21.0.4
+, Java OpenJDK 64-Bit Server VM).
+Type in expressions for evaluation. Or try :help.
+
+
+scala> import fs2.*
+
+scala>   def mostCommon(k: Int, ids: Stream[Pure, String]): St
+ring = {
+     |     // Replace this implementation with the Misra Gries
+ summary.
+     |     val initialCounts: Map[String, Int] = Map.empty
+     |     val finalCounts = ids
+     |       .fold(initialCounts) { (counts, id) =>
+     |         counts.get(id) match {
+     |           case Some(previousCount)       => counts + ((
+id, previousCount + 1))
+     |           case None if (counts.size < k) => counts + ((
+id, 1))
+     |           case None =>
+     |             counts.collect {
+     |               case (id, count) if count > 1 => (id, cou
+nt - 1)
+     |             }
+     |         }
+     |       }
+     |       .compile
+     |       .last
+     |       .getOrElse(initialCounts)
+     |     val (mostCommonId, _) = finalCounts.maxBy { case (_
+, count) => count }
+     |     mostCommonId
+     |   }
+     |
+     |
+def mostCommon(k: Int, ids: fs2.Stream[fs2.Pure, String]): Str
+ing
+
+scala>   val userIds: Stream[Pure, String] =
+     |     Stream
+     |       .range(0, Int.MaxValue)
+     |       .map(id => s"u$id")
+     |
+val userIds: fs2.Stream[fs2.Pure, String] = Stream(..)
+
+scala> mostCommon(userIds)
+-- [E007] Type Mismatch Error: -------------------------------
+------------------
+1 |mostCommon(userIds)
+  |           ^^^^^^^
+  |           Found:    (userIds : fs2.Stream[fs2.Pure, String
+])
+  |           Required: Int
+  |
+  | longer explanation available when compiling with `-explain
+`
+1 error found
+
+scala> mostCommon(100, userIds)
+^C
+λ> tmux capture-pane -pS - > part-2.log
+λ> mv part-2.log scaladays-workshop-notes/
+λ> pwd
+/Users/zainab/dev/zainab-ali/functional-stream-processing-work
+shop
+λ> scala-cli run project.scala scala/WorkshopAquascapeApp.scal
+a scala/Part1Introduction/Fig2Take.scala
+Compiling project (Scala 3.7.0, JVM (21))
+Compiled project (Scala 3.7.0, JVM (21))
+λ> scala-cli project.scala
+[error]  No main class found
+λ> scala-cli repl project.scala
+Welcome to Scala 3.7.0 (21.0.4, Java OpenJDK 64-Bit Server VM)
+.
+Type in expressions for evaluation. Or try :help.
+
+scala> import fs2.*
+
+scala> Stream.empty
+val res0: fs2.Stream[fs2.Pure, Nothing] = Stream(..)
+
+scala> Stream(1).repeat
+val res1: fs2.Stream[[x] =>> fs2.Pure[x], Int] = Stream(..)
+
+scala> Stream(1).repeat.drain
+val res2: fs2.Stream[[x] =>> fs2.Pure[x], Nothing] = Stream(..
+)
+
+scala> Stream(1).repeat.drain.compile.count
+^C
+λ> scala-cli repl project.scala
+Welcome to Scala 3.7.0 (21.0.4, Java OpenJDK 64-Bit Server VM)
+.
+Type in expressions for evaluation. Or try :help.
+
+scala> Stream(())
+there was 1 deprecation warning; re-run with -deprecation for
+details
+1 warning found
+val res0: Stream[Unit] = Stream((), <not computed>)
+
+scala> import fs2.*
+
+scala> Stream(())
+val res1: fs2.Stream[[x] =>> fs2.Pure[x], Unit] = Stream(..)
+
+scala> Stream(1)
+val res2: fs2.Stream[[x] =>> fs2.Pure[x], Int] = Stream(..)
+
+scala> Stream(1).repeat.compile.last
+
+^C
+λ> scala-cli repl project.scala
+Welcome to Scala 3.7.0 (21.0.4, Java OpenJDK 64-Bit Server VM)
+.
+Type in expressions for evaluation. Or try :help.
+
+scala> import fs2.*
+
+scala> Stream.empty.map(_ => 1)
+val res0: fs2.Stream[fs2.Pure, Int] = Stream(..)
+
+scala> res0.compile.toList
+val res1: List[Int] = List()
+
+scala> Stream.empty.compile.toList
+val res2: List[Nothing] = List()
+
+scala> Stream.empty.map(_ => 1).compile.toList
+val res3: List[Int] = List()
+
+scala> :t res0
+fs2.Stream[fs2.Pure, Int]
+
+scala> Stream.empty.compile.last
+val res4: Option[Nothing] = None
+
+scala> Stream(2).compile.last
+val res5: Option[Int] = Some(2)
+
+scala> Stream.empty.map(_ => 1).compile.last
+val res6: Option[Int] = None
+
+scala> :q
+λ> scala-cli repl project.scala scala/WorkshopAquascapeApp.sca
+la scala/Part1Introduction/Fig2Take.scala
+Compiling project (Scala 3.7.0, JVM (21))
+Compiled project (Scala 3.7.0, JVM (21))
+Welcome to Scala 3.7.0 (21.0.4, Java OpenJDK 64-Bit Server VM)
+.
+Type in expressions for evaluation. Or try :help.
+
+scala> :q
+λ> scala-cli run project.scala scala/WorkshopAquascapeApp.scal
+a scala/Part1Introduction/Fig2Take.scala
+λ> scala-cli run project.scala scala/WorkshopAquascapeApp.scal
+a scala/Part1Introduction/Fig2Take.scala
+Compiling project (Scala 3.7.0, JVM (21))
+Compiled project (Scala 3.7.0, JVM (21))
+λ> scala-cli run project.scala scala/WorkshopAquascapeApp.scal
+a scala/Part1Introduction/Fig2Take.scala
+Compiling project (Scala 3.7.0, JVM (21))
+Compiled project (Scala 3.7.0, JVM (21))
+λ> scala-cli run project.scala scala/WorkshopAquascapeApp.scal
+a scala/Part1Introduction/Fig2Take.scala
+Compiling project (Scala 3.7.0, JVM (21))
+Compiled project (Scala 3.7.0, JVM (21))
+λ> scala-cli run project.scala scala/WorkshopAquascapeApp.scal
+a scala/Part1Introduction/Fig2Take.scala
+Compiling project (Scala 3.7.0, JVM (21))
+Compiled project (Scala 3.7.0, JVM (21))
+λ> scala-cli run project.scala scala/WorkshopAquascapeApp.scal
+a scala/Part1Introduction/Fig2Take.scala
+Compiling project (Scala 3.7.0, JVM (21))
+Compiled project (Scala 3.7.0, JVM (21))
+λ> scala-cli repl project.scala
+Welcome to Scala 3.7.0 (21.0.4, Java OpenJDK 64-Bit Server VM)
+.
+Type in expressions for evaluation. Or try :help.
+
+scala> import fs2.*
+
+scala> val helloWords = Stream("Hello", "Lausanne")
+     | val goodbyeWords = Stream("Goodbye", "London")
+     |
+val helloWords: fs2.Stream[[x] =>> fs2.Pure[x], String] = Stre
+am(..)
+val goodbyeWords: fs2.Stream[[x] =>> fs2.Pure[x], String] = St
+ream(..)
+
+scala> (helloWords ++ goodbyeWords)
+val res0: fs2.Stream[[x] =>> fs2.Pure[x], String] = Stream(..)
+
+scala> res0.compile.toList
+val res1: List[String] = List(Hello, Lausanne, Goodbye, London
+)
+
+scala> helloWords.zip(goodbyeWords)
+val res2: fs2.Stream[[x] =>> fs2.Pure[x], (String, String)] =
+Stream(..)
+
+scala> helloWords.zip(goodbyeWords).compile.toList
+val res3: List[(String, String)] = List((Hello,Goodbye), (Laus
+anne,London))
+
+scala> helloWords.zip(goodbyeWords).compile.toList
+val res4: List[(String, String)] = List((Hello,Goodbye), (Laus
+anne,London))
+
+scala> helloWords
+     |   .flatMap(helloWord =>
+     |     goodbyeWords.map(goodbyeWord => s"$helloWord-$goodb
+yeWord")
+     |   )
+     |
+val res5: fs2.Stream[[x] =>> fs2.Pure[x], String] = Stream(..)
+
+scala> res5.compile.toListy
+
+-- [E008] Not Found Error: -----------------------------------
+------------------
+1 |res5.compile.toListy
+  |^^^^^^^^^^^^^^^^^^^^
+  |value toListy is not a member of fs2.Stream.CompileOps[fs2.
+Pure, [A] =>> A, String] - did you mean fs2.Stream.CompileOps[
+fs2.Pure, [A] =>> A, String].toList?
+1 error found
+
+scala>
+
+scala> res5.compile.toList
+val res6: List[String] = List(Hello-Goodbye, Hello-London, Lau
+sanne-Goodbye, Lausanne-London)
+
+scala> Stream(1,2,3).zip(4,5,6).compile.count
+-- [E007] Type Mismatch Error: -------------------------------
+------------------
+1 |Stream(1,2,3).zip(4,5,6).compile.count
+  |                  ^^^^^
+  |                  Found:    (Int, Int, Int)
+  |                  Required: fs2.Stream[[x] =>> fs2.Pure[x],
+ Any]
+  |
+  | longer explanation available when compiling with `-explain
+`
+1 error found
+
+scala> Stream(1,2,3).zip(Stream(4,5,6)).compile.count
+val res7: Long = 3
+
+scala> Stream(1,2,3).zip(Stream(4,5,6)).compile.toList
+val res8: List[(Int, Int)] = List((1,4), (2,5), (3,6))
+
+scala> :q
+λ> scala-cli run project.scala scala/WorkshopAquascapeApp.scal
+a scala/Part1Introduction/Fig3CombiningZip.scala
+Compiling project (Scala 3.7.0, JVM (21))
+Compiled project (Scala 3.7.0, JVM (21))
+λ> scala-cli run project.scala scala/WorkshopAquascapeApp.scal
+a scala/Part1Introduction/Fig3CombiningZip.scala
+Compiling project (Scala 3.7.0, JVM (21))
+Compiled project (Scala 3.7.0, JVM (21))
+λ> scala-cli relp project.scala
+[error]  relp is not a /nix/store/9dm50qbnb02mspzzjs7yl168v8al
+h3bs-scala-cli-1.8.0/bin/scala-cli sub-command and it is not a
+ valid path to an input file or directory.
+Try viewing the relevant help to see the list of available sub
+-commands and options.
+  /nix/store/9dm50qbnb02mspzzjs7yl168v8alh3bs-scala-cli-1.8.0/
+bin/scala-cli --help
+λ> scala-cli repl project.scala
+Welcome to Scala 3.7.0 (21.0.4, Java OpenJDK 64-Bit Server VM)
+.
+Type in expressions for evaluation. Or try :help.
+
+scala> Stream.emits("ab".toList)
+-- [E008] Not Found Error: -----------------------------------
+------------------
+1 |Stream.emits("ab".toList)
+  |^^^^^^^^^^^^
+  |value emits is not a member of object scala.collection.immu
+table.Stream - did you mean Stream.empty?
+1 error found
+
+scala> import fs2.*
+
+scala> Stream.emits("ab".toList).compile.toList
+val res0: List[Char] = List(a, b)
+
+scala> Stream.emits("ab".toList)
+val res1: fs2.Stream[[x] =>> fs2.Pure[x], Char] = Stream(..)
+
+scala> Stream.emits(List('a, 'b'))
+-- Error: ----------------------------------------------------
+------------------
+1 |Stream.emits(List('a, 'b'))
+  |                  ^
+  |symbol literal 'a is no longer supported,
+  |use a string literal "a" or an application Symbol("a") inst
+ead,
+  |or enclose in braces '{a} if you want a quoted expression.
+  |For now, you can also `import language.deprecated.symbolLit
+erals` to accept
+  |the idiom, but this possibility might no longer be availabl
+e in the future.
+
+scala> Stream(List('a', 'b'))
+val res2: fs2.Stream[[x] =>> fs2.Pure[x], List[Char]] = Stream
+(..)
+
+scala> Stream(List('a, 'b'))
+-- Error: ----------------------------------------------------
+------------------
+1 |Stream(List('a, 'b'))
+  |            ^
+  |symbol literal 'a is no longer supported,
+  |use a string literal "a" or an application Symbol("a") inst
+ead,
+  |or enclose in braces '{a} if you want a quoted expression.
+  |For now, you can also `import language.deprecated.symbolLit
+erals` to accept
+  |the idiom, but this possibility might no longer be availabl
+e in the future.
+
+scala> Stream(List('a', 'b'))
+val res3: fs2.Stream[[x] =>> fs2.Pure[x], List[Char]] = Stream
+(..)
+
+scala> Stream.emits(List('a', 'b'))
+val res4: fs2.Stream[[x] =>> fs2.Pure[x], Char] = Stream(..)
+
+scala> :q
+λ> scala-cli run project.scala scala/WorkshopAquascapeApp.scal
+a scala/Part1Introduction/Fig3
+scala/Part1Introduction/Fig3CombiningZip.scala
+scala/Part1Introduction/Fig3CombiningZip.scala~
+scala/Part1Introduction/Fig3FlatMap.scala
+scala/Part1Introduction/Fig3FlatMap.scala~
+λ> scala-cli run project.scala scala/WorkshopAquascapeApp.scal
+a scala/Part1Introduction/Fig3FlatMap.scala
+Compiling project (Scala 3.7.0, JVM (21))
+Compiled project (Scala 3.7.0, JVM (21))
+λ> scala-cli repl project.scala
+
+Welcome to Scala 3.7.0 (21.0.4, Java OpenJDK 64-Bit Server VM)
+.
+Type in expressions for evaluation. Or try :help.
+
+scala>
+
+scala> import fs2.*
+
+scala> def fanIn[A](input: Stream[IO, Stream[IO, A]]): Stream[
+IO, A] =
+     |   input.parJoinUnbounded
+     |
+-- [E006] Not Found Error: -----------------------------------
+------------------
+1 |def fanIn[A](input: Stream[IO, Stream[IO, A]]): Stream[IO,
+A] =
+  |                           ^^
+  |                           Not found: type IO
+  |
+  | longer explanation available when compiling with `-explain
+`
+-- [E006] Not Found Error: -----------------------------------
+------------------
+1 |def fanIn[A](input: Stream[IO, Stream[IO, A]]): Stream[IO,
+A] =
+  |                                      ^^
+  |                                      Not found: type IO
+  |
+  | longer explanation available when compiling with `-explain
+`
+-- [E006] Not Found Error: -----------------------------------
+------------------
+1 |def fanIn[A](input: Stream[IO, Stream[IO, A]]): Stream[IO,
+A] =
+  |                                                       ^^
+  |                                                       Not
+found: type IO
+  |
+  | longer explanation available when compiling with `-explain
+`
+3 errors found
+
+scala> import cats.effect.*
+
+scala> def fanIn[A](input: Stream[IO, Stream[IO, A]]): Stream[
+IO, A] =
+     |   input.parJoinUnbounded
+     |
+def fanIn
+  [A]
+    (input: fs2.Stream[cats.effect.IO, fs2.Stream[cats.effect.
+IO, A]]):
+      fs2.Stream[cats.effect.IO, A]
+
+scala> def fanOutAndIn[A, B](
+     |     input: Stream[IO, A],
+     |     fanFunction: A => Stream[IO, B]
+     | ): Stream[IO, B] = fanIn(fanOut(input, fanFunction))
+     |
+-- [E006] Not Found Error: -----------------------------------
+------------------
+4 |): Stream[IO, B] = fanIn(fanOut(input, fanFunction))
+  |                         ^^^^^^
+  |                         Not found: fanOut
+  |
+  | longer explanation available when compiling with `-explain
+`
+1 error found
+
+scala> def fanOut[A, B](
+     |     input: Stream[IO, A],
+     |     fanFunction: A => Stream[IO, B]
+     | ): Stream[IO, Stream[IO, B]] = input.map(fanFunction)
+     |
+def fanOut
+  [A, B]
+    (input: fs2.Stream[cats.effect.IO, A], fanFunction: A =>
+      fs2.Stream[cats.effect.IO, B]):
+      fs2.Stream[cats.effect.IO, fs2.Stream[cats.effect.IO, B]
+]
+
+scala> def fanOutAndIn[A, B](
+     |     input: Stream[IO, A],
+     |     fanFunction: A => Stream[IO, B]
+     | ): Stream[IO, B] = fanIn(fanOut(input, fanFunction))
+     |
+def fanOutAndIn
+  [A, B]
+    (input: fs2.Stream[cats.effect.IO, A], fanFunction: A =>
+      fs2.Stream[cats.effect.IO, B]): fs2.Stream[cats.effect.I
+O, B]
+
+scala> val sentenceData: Stream[Pure, String] =
+     |   Stream("This", "is", "a", "test", "sentence")
+     |
+val sentenceData: fs2.Stream[fs2.Pure, String] = Stream(..)
+
+scala> def generateTestBook(title: String): Stream[IO, String]
+ =
+     |   Stream
+     |     .sleep[IO](1.second)
+     |     .flatMap(_ => sentenceData.repeatN(4L))
+     |     .map(word => s"$title: $word")
+     |
+-- [E008] Not Found Error: -----------------------------------
+------------------
+3 |    .sleep[IO](1.second)
+  |               ^^^^^^^^
+  |value second is not a member of Int, but could be made avai
+lable as an extension method.
+  |
+  |The following import might fix the problem:
+  |
+  |  import scala.concurrent.duration.DurationInt
+  |
+1 error found
+
+scala> import scala.concurrent.duration.*
+     |
+
+scala> def generateTestBook(title: String): Stream[IO, String]
+ =
+     |   Stream
+     |     .sleep[IO](1.second)
+     |     .flatMap(_ => sentenceData.repeatN(4L))
+     |     .map(word => s"$title: $word")
+     |
+def generateTestBook(title: String): fs2.Stream[cats.effect.IO
+, String]
+
+scala> generateTestBook("Foo")
+val res0: fs2.Stream[cats.effect.IO, String] = Stream(..)
+
+scala> generateTestBook("Foo").compile.toList
+val res1: cats.effect.IO[List[String]] = IO(...)
+
+scala> generateTestBook("Foo").compile.toList.unsafeRunSync()
+-- [E172] Type Error: ----------------------------------------
+------------------
+1 |generateTestBook("Foo").compile.toList.unsafeRunSync()
+  |                                                      ^
+  |Could not find an implicit IORuntime.
+  |
+  |Instead of calling unsafe methods directly, consider using
+cats.effect.IOApp, which
+  |runs your IO. If integrating with non-functional code or ex
+perimenting in a REPL / Worksheet,
+  |add the following import:
+  |
+  |import cats.effect.unsafe.implicits.global
+  |
+  |Alternatively, you can create an explicit IORuntime value a
+nd put it in implicit scope.
+  |This may be useful if you have a pre-existing fixed thread
+pool and/or scheduler which you
+  |wish to use to execute IO programs. Please be sure to revie
+w thread pool best practices to
+  |avoid unintentionally degrading your application performanc
+e.
+  |
+  |
+  |The following import might fix the problem:
+  |
+  |  import cats.effect.unsafe.implicits.global
+  |
+1 error found
+
+scala> import cats.effect.unsafe.implicits.global
+     |
+
+scala> generateTestBook("Foo").compile.toList.unsafeRunSync()
+val res2: List[String] = List(Foo: This, Foo: is, Foo: a, Foo:
+ test, Foo: sentence, Foo: This, Foo: is, Foo: a, Foo: test, F
+oo: sentence, Foo: This, Foo: is, Foo: a, Foo: test, Foo: sent
+ence, Foo: This, Foo: is, Foo: a, Foo: test, Foo: sentence)
+
+scala> def countWords(book: Stream[IO, String]): Stream[IO, Lo
+ng] =
+     |   book.map(_ => 1L).foldMonoid
+     |
+     |
+def countWords
+  (book: fs2.Stream[cats.effect.IO, String]): fs2.Stream[cats.
+effect.IO, Long]
+
+scala> countWords(res2)
+-- [E007] Type Mismatch Error: -------------------------------
+------------------
+1 |countWords(res2)
+  |           ^^^^
+  |           Found:    (res2 : List[String])
+  |           Required: fs2.Stream[cats.effect.IO, String]
+  |
+  | longer explanation available when compiling with `-explain
+`
+1 error found
+
+scala> generateTestBook("Foo")
+val res3: fs2.Stream[cats.effect.IO, String] = Stream(..)
+
+scala> countWords(res3)
+val res4: fs2.Stream[cats.effect.IO, Long] = Stream(..)
+
+scala> countWords(res3).compile.last.unsafeRunSync()
+val res5: Option[Long] = Some(20)
+
+scala> def countWordsInBooks(titles: Stream[IO, String]): Stre
+am[IO, Long] =
+     |   fanOutAndIn(titles, title => countWordsInBook(title))
+.foldMonoid
+     |
+-- [E006] Not Found Error: -----------------------------------
+------------------
+2 |  fanOutAndIn(titles, title => countWordsInBook(title)).fol
+dMonoid
+  |                               ^^^^^^^^^^^^^^^^
+  |             Not found: countWordsInBook - did you mean cou
+ntWordsInBooks?
+  |
+  | longer explanation available when compiling with `-explain
+`
+1 error found
+
+scala> def countWordsInBook(title: String): Stream[IO, Long] =
+ countWords(
+     |   generateTestBook(title)
+     | )
+     |
+def countWordsInBook(title: String): fs2.Stream[cats.effect.IO
+, Long]
+
+scala> def countWordsInBooks(titles: Stream[IO, String]): Stre
+am[IO, Long] =
+     |   fanOutAndIn(titles, title => countWordsInBook(title))
+.foldMonoid
+     |
+     |
+def countWordsInBooks
+  (titles: fs2.Stream[cats.effect.IO, String]): fs2.Stream[cat
+s.effect.IO, Long]
+
+scala> countWordsInBooks(Stream("little-dorrit", "hard-times")
+)
+val res6: fs2.Stream[cats.effect.IO, Long] = Stream(..)
+
+scala> countWordsInBooks(Stream("little-dorrit", "hard-times")
+).compile.last.unsafeRunSync()
+val res7: Option[Long] = Some(40)
+
+scala> countWordsInBooks(Stream("little-dorrit", "hard-times")
+).compile.last.timed.unsafeRunSync()
+val res8: (scala.concurrent.duration.FiniteDuration, Option[Lo
+ng]) = (1021551375 nanoseconds,Some(40))
+
+scala> :q
+λ> scala-cli run project.scala scala/WorkshopAquascapeApp.scal
+a scala/Part1Introduction/Fig4ParJoinUnbounded.scala
+Compiling project (Scala 3.7.0, JVM (21))
+[error] ./scala/Part1Introduction/Fig4ParJoinUnbounded.scala:1
+0:5
+[error] value branch is not a member of fs2.Stream[cats.effect
+.IO, String]
+Error compiling project (Scala 3.7.0, JVM (21))
+Compilation failed
+λ> scala-cli run project.scala scala/WorkshopAquascapeApp.scal
+a scala/Part1Introduction/Fig4ParJoinUnbounded.scala
+Compiling project (Scala 3.7.0, JVM (21))
+[error] ./scala/Part1Introduction/Fig4ParJoinUnbounded.scala:1
+4:21
+[error] Not found: title
+[error]         Stream(s"T:$title-word1", s"T:$title-word2")
+[error]                     ^^^^^
+[error] ./scala/Part1Introduction/Fig4ParJoinUnbounded.scala:1
+4:40
+[error] Not found: title
+[error]         Stream(s"T:$title-word1", s"T:$title-word2")
+[error]                                        ^^^^^
+[error] ./scala/Part1Introduction/Fig4ParJoinUnbounded.scala:1
+7:25
+[error] No given instance of type cats.Show[fs2.Stream[[x] =>>
+ fs2.Pure[x], String]] was found for a context parameter of me
+thod stage in package aquascape
+[error]       .stage("upstream")
+[error]                         ^
+Error compiling project (Scala 3.7.0, JVM (21))
+Compilation failed
+λ> scala-cli run project.scala scala/WorkshopAquascapeApp.scal
+a scala/Part1Introduction/Fig4ParJoinUnbounded.scala
+Compiling project (Scala 3.7.0, JVM (21))
+[error] ./scala/Part1Introduction/Fig4ParJoinUnbounded.scala:1
+7:25
+[error] No given instance of type cats.Show[fs2.Stream[[x] =>>
+ fs2.Pure[x], String]] was found for a context parameter of me
+thod stage in package aquascape
+[error]       .stage("upstream")
+[error]                         ^
+Error compiling project (Scala 3.7.0, JVM (21))
+Compilation failed
+λ> scala-cli run project.scala scala/WorkshopAquascapeApp.scal
+a scala/Part1Introduction/Fig4ParJoinUnbounded.scala
+Compiling project (Scala 3.7.0, JVM (21))
+[error] ./scala/Part1Introduction/Fig4ParJoinUnbounded.scala:1
+8:25
+[error] No given instance of type cats.Show[fs2.Stream[[x] =>>
+ fs2.Pure[x], String]] was found for a context parameter of me
+thod stage in package aquascape
+[error]       .stage("upstream")
+[error]                         ^
+Error compiling project (Scala 3.7.0, JVM (21))
+Compilation failed
+λ> scala-cli run project.scala scala/WorkshopAquascapeApp.scal
+a scala/Part1Introduction/Fig4ParJoinUnbounded.scala
+Compiling project (Scala 3.7.0, JVM (21))
+Compiled project (Scala 3.7.0, JVM (21))
+λ> scala-cli run project.scala scala/WorkshopAquascapeApp.scal
+a scala/Part1Introduction/Fig4ParJoinUnbounded.scala
+Compiling project (Scala 3.7.0, JVM (21))
+Compiled project (Scala 3.7.0, JVM (21))
+λ> scala-cli run project.scala scala/WorkshopAquascapeApp.scal
+a scala/Part1Introduction/Fig4ParJoinUnbounded.scala
+Compiling project (Scala 3.7.0, JVM (21))
+[error] ./scala/Part1Introduction/Fig4ParJoinUnbounded.scala:1
+6:19
+[error] value second is not a member of Int, but could be made
+ available as an extension method.
+[error]
+[error] The following import might fix the problem:
+[error]
+[error]   import scala.concurrent.duration.DurationInt
+[error]
+[error]           .spaced(1.second)
+[error]                   ^^^^^^^^
+Error compiling project (Scala 3.7.0, JVM (21))
+Compilation failed
+λ> scala-cli run project.scala scala/WorkshopAquascapeApp.scal
+a scala/Part1Introduction/Fig4ParJoinUnbounded.scala
+Compiling project (Scala 3.7.0, JVM (21))
+[error] ./scala/Part1Introduction/Fig4ParJoinUnbounded.scala:1
+7:28
+[error] No given instance of type cats.effect.kernel.Temporal[
+F2] was found for a context parameter of method spaced in clas
+s Stream.
+[error] I found:
+[error]
+[error]     cats.effect.kernel.GenTemporal.genTemporalForIorT[
+F, L, Throwable](
+[error]       cats.effect.kernel.GenTemporal.genTemporalForKle
+isli[F², R, Throwable](
+[error]         cats.effect.kernel.GenTemporal.genTemporalForO
+ptionT[F³, Throwable](
+[error]           cats.effect.kernel.GenTemporal.genTemporalFo
+rEitherT[F⁴, E0, Throwable](
+[error]             cats.effect.kernel.GenTemporal.genTemporal
+ForIorT[F⁵, L², Throwable](
+[error]               cats.effect.kernel.GenTemporal.genTempor
+alForWriterT[F⁶, L³, Throwable
+[error]                 ](
+[error]                 /* missing */summon[cats.effect.kernel
+.GenTemporal[F⁶, Throwable]],
+[error]                 ???),
+[error]             ???)
+[error]           )
+[error]         )
+[error]       ),
+[error]     ???)
+[error]
+[error] But no implicit values were found that match type cats
+.effect.kernel.GenTemporal[F⁶, Throwable]
+[error]
+[error] where:    F  is a type variable with constraint <: [_]
+ =>> Any
+[error]           F2 is a type variable with constraint >: [x]
+ =>> fs2.Pure[x] and <: [x] =>> Any
+[error]           F² is a type variable with constraint <: [_²
+] =>> Any
+[error]           F³ is a type variable with constraint <: [_³
+] =>> Any
+[error]           F⁴ is a type variable with constraint <: [_⁴
+] =>> Any
+[error]           F⁵ is a type variable with constraint <: [_]
+ =>> Any
+[error]           F⁶ is a type variable with constraint <: [_⁵
+] =>> Any
+[error]           L  is a type variable
+[error]           L² is a type variable
+[error]           L³ is a type variable
+[error] .
+[error]           .spaced(1.second)
+[error]                            ^
+Error compiling project (Scala 3.7.0, JVM (21))
+Compilation failed
+λ> scala-cli run project.scala scala/WorkshopAquascapeApp.scal
+a scala/Part1Introduction/Fig4ParJoinUnbounded.scala
+Compiling project (Scala 3.7.0, JVM (21))
+Compiled project (Scala 3.7.0, JVM (21))
+λ> scala-cli run project.scala scala/WorkshopAquascapeApp.scal
+a scala/Part1Introduction/Fig4ParJoinUnbounded.scala
+Compiling project (Scala 3.7.0, JVM (21))
+[error] ./scala/Part1Introduction/Fig4ParJoinUnbounded.scala:1
+8:20
+[error] No given instance of type cats.Show[fs2.Stream[cats.ef
+fect.IO, String]] was found for a context parameter of method
+stage in package aquascape
+[error]       .stage("map")
+[error]                    ^
+Error compiling project (Scala 3.7.0, JVM (21))
+Compilation failed
+λ> scala-cli run project.scala scala/WorkshopAquascapeApp.scal
+a scala/Part1Introduction/Fig4ParJoinUnbounded.scala
+Compiling project (Scala 3.7.0, JVM (21))
+[error] ./scala/Part1Introduction/Fig4ParJoinUnbounded.scala:1
+0:11
+[error] Not found: type Show - did you mean Short.type? or per
+haps Short?
+[error]     given Show[Stream[IO, String]] = _.toString
+[error]           ^^^^
+[error] ./scala/Part1Introduction/Fig4ParJoinUnbounded.scala:1
+1:5
+[error] Found:    Nothing
+[error] Required: ?{ void: ? }
+[error] Note that implicit conversions were not tried because
+the result of an implicit conversion
+[error] must be more specific than ?{ void: cats.effect.IO[Uni
+t] }
+Error compiling project (Scala 3.7.0, JVM (21))
+Compilation failed
+λ> scala-cli run project.scala scala/WorkshopAquascapeApp.scal
+a scala/Part1Introduction/Fig4ParJoinUnbounded.scala
+Compiling project (Scala 3.7.0, JVM (21))
+Compiled project (Scala 3.7.0, JVM (21))
+λ> scala-cli run project.scala scala/WorkshopAquascapeApp.scal
+a scala/Part1Introduction/Fig4ParJoinUnbounded.scala
+Compiling project (Scala 3.7.0, JVM (21))
+Compiled project (Scala 3.7.0, JVM (21))
+Jjλ> scala-cli run project.scala scala/WorkshopAquascapeApp.sc
+ala scala/Part1Introduction/Fig4ParJoinUnbounded.scala
+Compiling project (Scala 3.7.0, JVM (21))
+Compiled project (Scala 3.7.0, JVM (21))
+λ> scala-cli run project.scala scala/WorkshopAquascapeApp.scal
+a scala/Part1Introduction/Fig4ParJoinUnbounded.scala
+Compiling project (Scala 3.7.0, JVM (21))
+Compiled project (Scala 3.7.0, JVM (21))
+λ> scala-cli run project.scala scala/WorkshopAquascapeApp.scal
+a scala/Part1Introduction/Fig4ParJoinUnbounded.scala
+Compiling project (Scala 3.7.0, JVM (21))
+Compiled project (Scala 3.7.0, JVM (21))
+λ> tmux capture-pane -pS - > scaladays-workshop-notes/part-3.l
+og
+
