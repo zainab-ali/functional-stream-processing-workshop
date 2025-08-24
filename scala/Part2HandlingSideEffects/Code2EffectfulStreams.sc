@@ -22,8 +22,8 @@ Stream("Mao", "Owl")
   .compile
   .drain
 
-val count: Long = Stream(1,2,3).compile.count
-val countIO: IO[Long] = Stream(1,2,3).evalMap(IO.println(_)).compile.count
+val count: Long = Stream(1, 2, 3).compile.count
+val countIO: IO[Long] = Stream(1, 2, 3).evalMap(IO.println(_)).compile.count
 
 Stream.exec(greetingIO)
 

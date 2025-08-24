@@ -42,12 +42,11 @@ class Ex4BracketSolutions extends CatsEffectSuite {
     assertIO(TestControl.executeEmbed(result), List(3.second))
   }
 
-
   test("Time several streams") {
     val result = Recorder.run { recorder =>
       Stream(1, 2, 3).flatMap { n =>
         val inputStream = Stream.sleep[IO](n.seconds)
-          inputStream.through(timed(recorder))
+        inputStream.through(timed(recorder))
       }
     }
 

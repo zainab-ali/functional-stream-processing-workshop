@@ -18,29 +18,31 @@ trait GameApp[S, C] extends IOApp.Simple {
   // Implement this function
   def run: IO[Unit] = {
     game.flatMap { gameValue =>
-    val frame = Frame.default.withSize(600, 600).withBackground(Color.paleGreen)
+      val frame =
+        Frame.default.withSize(600, 600).withBackground(Color.paleGreen)
 
-    SignallingRef.of[IO, S](gameValue.init)
-      .flatMap { gameStateRef =>
-        val renderLoop = gameStateRef
-          .discrete
-          .map(gameValue.render)
+      SignallingRef
+        .of[IO, S](gameValue.init)
+        .flatMap { gameStateRef =>
+          val renderLoop = gameStateRef.discrete
+            .map(gameValue.render)
 
-        val eventLoop =
-          Stream.eval(IO.readLine)
-            .repeat
-            .mapFilter(gameValue.input)
-            .map { command =>
-          val actionStream = gameValue.action(command, gameStateRef)
-          actionStream
-        }.parJoinUnbounded
+          val eventLoop =
+            Stream
+              .eval(IO.readLine)
+              .repeat
+              .mapFilter(gameValue.input)
+              .map { command =>
+                val actionStream = gameValue.action(command, gameStateRef)
+                actionStream
+              }
+              .parJoinUnbounded
 
-        val simulationLoop = gameValue.simulation(gameStateRef)
-        Stream(renderLoop, simulationLoop, eventLoop)
-        .parJoinUnbounded
-        .animateToIO(frame)
+          val simulationLoop = gameValue.simulation(gameStateRef)
+          Stream(renderLoop, simulationLoop, eventLoop).parJoinUnbounded
+            .animateToIO(frame)
 
-      }
+        }
     }
 
   }
