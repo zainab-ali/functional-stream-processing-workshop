@@ -17,10 +17,9 @@ def drawWater(tap: Tap): IO[Unit] =
   IO.println(s"Drawing water from ${tap.temp} tap.")
 
 openTap("hot").flatMap { tap =>
-  drawWater(tap)
-  .attempt
-  .flatTap(_ => closeTap(tap))
-  .rethrow
+  drawWater(tap).attempt
+    .flatTap(_ => closeTap(tap))
+    .rethrow
 }
 
 val tapStream = Stream.bracket(openTap("hot"))(closeTap)
@@ -41,11 +40,15 @@ tapStream
   .drain
   .unsafeRunSync()
 
-Stream("hot", "cold").flatMap { temp =>
-  Stream.bracket(openTap(temp))(closeTap)
+Stream("hot", "cold")
+  .flatMap { temp =>
+    Stream
+      .bracket(openTap(temp))(closeTap)
       .flatMap(drawTwice)
-    }.compile.drain
-      .unsafeRunSync()
+  }
+  .compile
+  .drain
+  .unsafeRunSync()
 
 tapStream
   .evalMap(_ => IO.raiseError(BOOM))
