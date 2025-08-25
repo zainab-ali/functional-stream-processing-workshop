@@ -1,0 +1,612 @@
+λ> scala-cli repl project.scala
+
+Welcome to Scala 3.7.0 (21.0.4, Java OpenJDK 64-Bit Server VM).
+Type in expressions for evaluation. Or try :help.
+
+scala>
+
+scala> import fs2.*
+     | import fs2.concurrent.*
+     | import cats.effect.*
+     | import cats.effect.unsafe.implicits.global
+     | import scala.concurrent.duration.*
+     |
+
+scala> Channel.unbounded[IO, String]
+     |
+val res0: cats.effect.IO[fs2.concurrent.Channel[cats.effect.IO,
+ String]] = IO(...)
+
+scala> val channel = Channel.unbounded[IO, String].unsafeRunSyn
+c()
+val channel: fs2.concurrent.Channel[cats.effect.IO, String] = f
+s2.concurrent.Channel$$anon$1@1233f419
+
+scala> channel.send("Chocolate")
+val res1: cats.effect.IO[Either[fs2.concurrent.Channel.Closed,
+Unit]] = IO(...)
+
+scala> channel.send("Chocolate").unsafeRunSync()
+val res2: Either[fs2.concurrent.Channel.Closed, Unit] = Right((
+))
+
+scala> channel.stream
+val res3: fs2.Stream[cats.effect.IO, String] = Stream(..)
+
+scala> channel.stream.evalMap(text => IO.println(text)).compile
+.drain
+val res4: cats.effect.IO[Unit] = IO(...)
+
+scala> res4.timeout(4.seconds).unsafeRunSync()
+Chocolate
+java.util.concurrent.TimeoutException: 4 seconds
+  at timeout @ rs$line$8$.<clinit>(rs$line$8:1)
+  at unsafeRunSync @ rs$line$3$.<clinit>(rs$line$3:1)
+  at unsafeRunSync @ rs$line$3$.<clinit>(rs$line$3:1)
+  at *>$extension @ fs2.concurrent.Channel$$anon$1.sendImpl$$an
+onfun$1$$anonfun$1(Channel.scala:171)
+
+scala> channel.close
+val res6: cats.effect.IO[Either[fs2.concurrent.Channel.Closed,
+Unit]] = IO(...)
+
+scala> channel.close.unsafeRunSync()
+val res7: Either[fs2.concurrent.Channel.Closed, Unit] = Right((
+))
+
+scala> res4.timeout(4.seconds).unsafeRunSync()
+
+scala> res4.compile.toList.unsafeRunSync()
+-- [E008] Not Found Error: ------------------------------------
+-----------------
+1 |res4.compile.toList.unsafeRunSync()
+  |^^^^^^^^^^^^
+  |value compile is not a member of cats.effect.IO[Unit]
+1 error found
+
+scala> channel.stream.evalMap(text => IO.println(text)).compile
+.toList.unsafeRunSync()
+val res8: List[Unit] = List()
+
+scala> val boundedChannel = Channel.bounded[IO, String](2)
+val boundedChannel:
+  cats.effect.IO[fs2.concurrent.Channel[cats.effect.IO, String]
+] = IO(...)
+
+scala> val boundedChannel = Channel.bounded[IO, String](2).unsa
+feRunSync()
+val boundedChannel: fs2.concurrent.Channel[cats.effect.IO, Stri
+ng] = fs2.concurrent.Channel$$anon$1@7e7c3f0
+
+scala> boundedChannel.send("Chocolate").unsafeRunSync()
+val res9: Either[fs2.concurrent.Channel.Closed, Unit] = Right((
+))
+
+scala> boundedChannel.send("Chocolate-2").unsafeRunSync()
+val res10: Either[fs2.concurrent.Channel.Closed, Unit] = Right(
+())
+
+scala> boundedChannel.send("Chocolate-3").timeout(5.seconds).u
+nsafeRunSync()
+java.util.concurrent.TimeoutException: 5 seconds
+  at timeout @ rs$line$8$.<clinit>(rs$line$8:1)
+  at unsafeRunSync @ rs$line$3$.<clinit>(rs$line$3:1)
+  at unsafeRunSync @ rs$line$3$.<clinit>(rs$line$3:1)
+  at *>$extension @ fs2.concurrent.Channel$$anon$1.sendImpl$$an
+onfun$1$$anonfun$1(Channel.scala:171)
+
+scala> boundedChannel.trySend("Chocolate-3").timeout(5.seconds)
+.unsafeRunSync()
+val res12: Either[fs2.concurrent.Channel.Closed, Boolean] = Rig
+ht(false)
+
+scala> boundedChannel.close.unsafeRunSync()
+val res13: Either[fs2.concurrent.Channel.Closed, Unit] = Right(
+())
+
+scala> boundedChannel.trySend("Chocolate-3").timeout(5.seconds)
+.unsafeRunSync()
+val res14: Either[fs2.concurrent.Channel.Closed, Boolean] = Lef
+t(fs2.concurrent.Channel$Closed$@95f1b1d)
+
+scala>     val producer =
+     |       Stream.range(0, Int.MaxValue)
+     |       .evalMap(i => IO.println(s"Producing $i"))
+     |       .spaced(1.second)
+     |
+val producer: fs2.Stream[cats.effect.IO, Unit] = Stream(..)
+
+scala> producer.compile.drain.timeout(5.seconds).unsafeRunSync(
+)
+Producing 0
+Producing 1
+Producing 2
+Producing 3
+Producing 4
+java.util.concurrent.TimeoutException: 5 seconds
+  at timeout @ rs$line$8$.<clinit>(rs$line$8:1)
+  at unsafeRunSync @ rs$line$3$.<clinit>(rs$line$3:1)
+  at unsafeRunSync @ rs$line$3$.<clinit>(rs$line$3:1)
+  at *>$extension @ fs2.concurrent.Channel$$anon$1.sendImpl$$an
+onfun$1$$anonfun$1(Channel.scala:171)
+
+def sendAll: fs2.Pipe[F, A, Nothing]
+
+scala> channel.sendAll
+val res16: fs2.Pipe[cats.effect.IO, String, Nothing] = fs2.conc
+urrent.Channel$$anon$1$$Lambda/0x000000012b7e8a30@4f1b0725
+
+scala> val channel =
+    | Channel.unbounded[IO, Int].unsafeRunSync()
+     |
+val channel: fs2.concurrent.Channel[cats.effect.IO, Int] = fs2.
+concurrent.Channel$$anon$1@29167528
+
+scala> channel.sendAll(producer)
+-- [E007] Type Mismatch Error: --------------------------------
+-----------------
+1 |channel.sendAll(producer)
+  |                ^^^^^^^^
+  |                Found:    (producer : fs2.Stream[cats.effect
+.IO, Unit])
+  |                Required: fs2.Stream[cats.effect.IO, Int]
+  |
+  | longer explanation available when compiling with `-explain`
+1 error found
+
+scala>     val producer =
+     |       Stream.range(0, Int.MaxValue)
+     |       .evalMap(i => IO.println(s"Producing $i").as(i))
+     |       .spaced(1.second)
+     |
+val producer: fs2.Stream[cats.effect.IO, Int] = Stream(..)
+
+scala> val producerThroughChannel = channel.sendAll(producer)
+val producerThroughChannel: fs2.Stream[cats.effect.IO, Nothing]
+ = Stream(..)
+
+scala>     val consumer = channel.stream.evalMap(i => IO.printl
+n(s"Consuming $i"))
+     |
+val consumer: fs2.Stream[cats.effect.IO, Unit] = Stream(..)
+
+scala> Stream(producerThroughChannel, consumer).parJoinUnbounde
+d
+val res17: fs2.Stream[cats.effect.IO, Unit] = Stream(..)
+
+scala> res17.compile.drain.timeout(5.seconds).unsafeRunSync()
+Producing 0
+Consuming 0
+Producing 1
+Consuming 1
+Producing 2
+Consuming 2
+Producing 3
+Consuming 3
+Producing 4
+Consuming 4
+java.util.concurrent.TimeoutException: 5 seconds
+  at timeout @ rs$line$8$.<clinit>(rs$line$8:1)
+  at unsafeRunSync @ rs$line$3$.<clinit>(rs$line$3:1)
+  at unsafeRunSync @ rs$line$3$.<clinit>(rs$line$3:1)
+  at *>$extension @ fs2.concurrent.Channel$$anon$1.sendImpl$$an
+onfun$1$$anonfun$1(Channel.scala:171)
+
+scala>     val consumer = channel.stream
+     |     .evalMap(i => IO.println(s"Consuming $i"))
+     |     .spaced(1.second)
+     |
+val consumer: fs2.Stream[cats.effect.IO, Unit] = Stream(..)
+
+scala> Stream(producerThroughChannel, consumer).parJoinUnbounde
+d
+val res19: fs2.Stream[cats.effect.IO, Unit] = Stream(..)
+
+
+scala> res19.compile.drain.timeout(5.seconds).unsafeRunSync()
+Producing 0
+Consuming 0
+Producing 1
+Consuming 1
+Producing 2
+Consuming 2
+Producing 3
+Consuming 3
+Producing 4
+Consuming 4
+java.util.concurrent.TimeoutException: 5 seconds
+  at timeout @ rs$line$8$.<clinit>(rs$line$8:1)
+  at unsafeRunSync @ rs$line$3$.<clinit>(rs$line$3:1)
+  at unsafeRunSync @ rs$line$3$.<clinit>(rs$line$3:1)
+  at *>$extension @ fs2.concurrent.Channel$$anon$1.sendImpl$$an
+onfun$1$$anonfun$1(Channel.scala:171)
+                                                              s
+cala>     val consumer = channel.stream
+     |     .evalMap(i => IO.println(s"Consuming $i"))
+     |     .spaced(2.second)
+     |
+val consumer: fs2.Stream[cats.effect.IO, Unit] = Stream(..)
+
+
+scala> Stream(producerThroughChannel, consumer).parJoinUnbounde
+d
+val res21: fs2.Stream[cats.effect.IO, Unit] = Stream(..)
+
+
+scala> res21.compile.drain.timeout(5.seconds).unsafeRunSync()
+
+Producing 0
+Consuming 0
+Producing 1
+Consuming 1
+Producing 2
+Producing 3
+Consuming 2
+Producing 4
+java.util.concurrent.TimeoutException: 5 seconds
+  at timeout @ rs$line$8$.<clinit>(rs$line$8:1)
+  at unsafeRunSync @ rs$line$3$.<clinit>(rs$line$3:1)
+  at unsafeRunSync @ rs$line$3$.<clinit>(rs$line$3:1)
+  at *>$extension @ fs2.concurrent.Channel$$anon$1.sendImpl$$an
+onfun$1$$anonfun$1(Channel.scala:171)
+
+scala> res21.compile.drain.timeout(5.seconds).unsafeRunSy
+scala> res21.compile.drain.timeout(5.seconds).unsafeRunSync()
+Producing 0
+Consuming 4
+Producing 1
+Consuming 0
+Producing 2
+Producing 3
+Consuming 1
+Producing 4
+java.util.concurrent.TimeoutException: 5 seconds
+  at timeout @ rs$line$8$.<clinit>(rs$line$8:1)
+  at unsafeRunSync @ rs$line$3$.<clinit>(rs$line$3:1)
+  at unsafeRunSync @ rs$line$3$.<clinit>(rs$line$3:1)
+  at *>$extension @ fs2.concurrent.Channel$$anon$1.sendImpl$$an
+onfun$1$$anonfun$1(Channel.scala:171)
+scala> val boundedChannel = Channel
+     |   .bounded[IO, Int](2)
+val boundedChannel: cats.effect.IO[fs2.concurrent.Channel[cats.
+effect.IO, Int]] = IO(...)
+
+scala> val boundedChannel = Channel
+     |   .bounded[IO, Int](2).unsafeRunSync()
+val boundedChannel: fs2.concurrent.Channel[cats.effect.IO, Int]
+ = fs2.concurrent.Channel$$anon$1@27442695
+
+scala>     val producer =
+     |       boundedChannel.sendAll(
+     |         Stream.range(0, Int.MaxValue)
+     |       .evalMap(i => IO.println(s"Producing $i").as(i))
+     |       .spaced(1.second)
+     |       )
+     |
+     |
+val producer: fs2.Stream[cats.effect.IO, Nothing] = Stream(..)
+
+scala>     val consumer = boundedChannel.stream
+     |     .evalMap(i => IO.println(s"Consuming $i"))
+     |     .spaced(2.second)
+     |
+val consumer: fs2.Stream[cats.effect.IO, Unit] = Stream(..)
+
+scala> Stream(producer, consumer).parJoinUnbounded.compile.drai
+n.timeout(15.seconds).unsafeRunSync()
+Producing 0
+Consuming 0
+Producing 1
+Consuming 1
+Producing 2
+Producing 3
+Consuming 2
+Producing 4
+Producing 5
+Consuming 3
+Producing 6
+Consuming 4
+Producing 7
+Consuming 5
+Producing 8
+Producing 9
+Consuming 6
+Consuming 7
+java.util.concurrent.TimeoutException: 15 seconds
+  at timeout @ rs$line$8$.<clinit>(rs$line$8:1)
+  at unsafeRunSync @ rs$line$3$.<clinit>(rs$line$3:1)
+  at unsafeRunSync @ rs$line$3$.<clinit>(rs$line$3:1)
+  at *>$extension @ fs2.concurrent.Channel$$anon$1.sendImpl$$an
+onfun$1$$anonfun$1(Channel.scala:171)
+
+scala> Stream(producer, consumer).parJoinUnbounded.compile.drai
+n.timeout(25.seconds).unsafeRunSync()
+Producing 0
+Consuming 0
+Producing 1
+Consuming 1
+Producing 2
+Producing 3
+Consuming 2
+Producing 4
+Producing 5
+Consuming 3
+Producing 6
+Consuming 4
+Producing 7
+Consuming 5
+Producing 8
+Producing 9
+Consuming 6
+Consuming 7
+Producing 10
+Consuming 8
+Producing 11
+Producing 12
+Consuming 9
+Consuming 10
+Producing 13
+Consuming 11
+Producing 14
+Producing 15
+Consuming 12
+java.util.concurrent.TimeoutException: 25 seconds
+  at timeout @ rs$line$8$.<clinit>(rs$line$8:1)
+  at unsafeRunSync @ rs$line$3$.<clinit>(rs$line$3:1)
+  at unsafeRunSync @ rs$line$3$.<clinit>(rs$line$3:1)
+  at *>$extension @ fs2.concurrent.Channel$$anon$1.sendImpl$$an
+onfun$1$$anonfun$1(Channel.scala:171)
+
+scala> val boundedChannel = Channel.bounded[IO, Int](5).unsafeR
+unSync()
+     |
+val boundedChannel: fs2.concurrent.Channel[cats.effect.IO, Int]
+ = fs2.concurrent.Channel$$anon$1@14897087
+
+scala>     val producer =
+     |       boundedChannel.sendAll(
+     |         Stream.range(0, Int.MaxValue)
+     |       .evalMap(i => IO.println(s"Producing $i").as(i))
+     |       .spaced(200.millis)
+     |       )
+     |
+val producer: fs2.Stream[cats.effect.IO, Nothing] = Stream(..)
+
+scala>     val consumer = boundedChannel.stream
+     |     .evalMap(i => IO.println(s"Consuming $i"))
+     |     .spaced(2.second)
+     |
+val consumer: fs2.Stream[cats.effect.IO, Unit] = Stream(..)
+
+scala> Stream(producer, consumer).parJoinUnbounded.compile.drai
+n.timeout(15.seconds).unsafeRunSync()
+Producing 0
+Consuming 0
+Producing 1
+Producing 2
+Producing 3
+Producing 4
+Producing 5
+Producing 6
+Consuming 1
+Producing 7
+Producing 8
+Producing 9
+Producing 10
+Producing 11
+Producing 12
+Consuming 2
+Consuming 3
+Consuming 4
+Consuming 5
+Consuming 6
+Consuming 7
+Producing 13
+Producing 14
+Producing 15
+Producing 16
+java.util.concurrent.TimeoutException: 15 seconds
+  at timeout @ rs$line$8$.<clinit>(rs$line$8:1)
+  at unsafeRunSync @ rs$line$3$.<clinit>(rs$line$3:1)
+  at unsafeRunSync @ rs$line$3$.<clinit>(rs$line$3:1)
+  at *>$extension @ fs2.concurrent.Channel$$anon$1.sendImpl$$an
+onfun$1$$anonfun$1(Channel.scala:171)
+
+
+scala> Stream(producer, consumer).parJoinUnbounded.compile.drai
+n.timeout(15.seconds).unsafeRunSync()
+Producing 0
+Consuming 13
+Producing 1
+Producing 2
+Producing 3
+Producing 4
+Producing 5
+Consuming 14
+Consuming 15
+Consuming 16
+Consuming 0
+Producing 6
+Producing 7
+Producing 8
+Producing 9
+Producing 10
+Producing 11
+Consuming 1
+Consuming 2
+Consuming 3
+java.util.concurrent.TimeoutException: 15 seconds
+  at timeout @ rs$line$8$.<clinit>(rs$line$8:1)
+  at unsafeRunSync @ rs$line$3$.<clinit>(rs$line$3:1)
+  at unsafeRunSync @ rs$line$3$.<clinit>(rs$line$3:1)
+  at *>$extension @ fs2.concurrent.Channel$$anon$1.sendImpl$$an
+onfun$1$$anonfun$1(Channel.scala:171)
+
+scala> :q
+λ> scala-cli run project.scala scala/Part5Application/*.scala
+Compiling project (Scala 3.7.0, JVM (21))
+[error] ./scala/Part5Application/Game3FruitPicking.scala:18:13
+[error] Not found: type GameAppWithErrorAndLoggingAndMetrics
+[error]     extends GameAppWithErrorAndLoggingAndMetrics[
+[error]             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Error compiling project (Scala 3.7.0, JVM (21))
+Compilation failed
+λ> scala-cli run project.scala scala/Part5Application/Game.scal
+a scala/Part5Application/Game
+scala/Part5Application/Game.scala
+scala/Part5Application/Game1GrowingCircle.scala
+scala/Part5Application/Game2ResettingCircle.scala
+scala/Part5Application/Game3FruitPicking.scala
+λ> scala-cli compike project.scala scala/Part5Application/Game.
+scala scala/Part5Application/Game1GrowingCircle.scala
+[error]  compike is not a /nix/store/9dm50qbnb02mspzzjs7yl168v8
+alh3bs-scala-cli-1.8.0/bin/scala-cli sub-command and it is not
+a valid path to an input file or directory.
+Try viewing the relevant help to see the list of available sub-
+commands and options.
+  /nix/store/9dm50qbnb02mspzzjs7yl168v8alh3bs-scala-cli-1.8.0/b
+in/scala-cli --help
+λ> scala-cli compile project.scala scala/Part5Application/Game.
+scala scala/Part5Application/Game1GrowingCircle.scala
+Compiling project (Scala 3.7.0, JVM (21))
+[error] ./scala/Part5Application/Game1GrowingCircle.scala:12:35
+[error] Not found: type GameApp
+[error] object Game1GrowingCircle extends GameApp[Int, Unit] {
+[error]                                   ^^^^^^^
+Error compiling project (Scala 3.7.0, JVM (21))
+Compilation failed
+λ> scala-cli compile project.scala scala/Part5Application/Game.
+scala scala/Part5Application/solution/Game1GrowingCircle.scala
+[error]  File not found: /Users/zainab/dev/zainab-ali/functiona
+l-stream-processing-workshop/scala/Part5Application/solution/Ga
+me1GrowingCircle.scala
+λ> scala-cli compile project.scala scala/Part5Application/*.sca
+la scala/Part5Application/**/*.scala
+Compiling project (Scala 3.7.0, JVM (21))
+Compiled project (Scala 3.7.0, JVM (21))
+λ> scala-cli run project.scala scala/Part5Application/*.scala s
+cala/Part5Application/**/*.scala
+[error]  Found several main classes: Example93, Game1GrowingCir
+cle, Game3FruitPicking
+You can run one of them by passing it with the --main-class opt
+ion, e.g.
+  /nix/store/9dm50qbnb02mspzzjs7yl168v8alh3bs-scala-cli-1.8.0/b
+in/scala-cli run project.scala scala/Part5Application/Ex1GameAp
+p.scala scala/Part5Application/Game.scala scala/Part5Applicatio
+n/Game1GrowingCircle.scala scala/Part5Application/Game2Resettin
+gCircle.scala scala/Part5Application/Game3FruitPicking.scala sc
+ala/Part5Application/Ex1GameApp.scala scala/Part5Application/Ga
+me.scala scala/Part5Application/Game1GrowingCircle.scala scala/
+Part5Application/Game2ResettingCircle.scala scala/Part5Applicat
+ion/Game3FruitPicking.scala scala/Part5Application/solution/Gam
+eApp.scala scala/Part5Application/solution/GameAppWithError.sca
+la scala/Part5Application/solution/GameAppWithErrorAndLogging.s
+cala scala/Part5Application/solution/GameAppWithErrorAndLogging
+AndMetrics.scala --main-class Example93
+
+You can pick the main class interactively by passing the --inte
+ractive option.
+  /nix/store/9dm50qbnb02mspzzjs7yl168v8alh3bs-scala-cli-1.8.0/b
+in/scala-cli run project.scala scala/Part5Application/Ex1GameAp
+p.scala scala/Part5Application/Game.scala scala/Part5Applicatio
+n/Game1GrowingCircle.scala scala/Part5Application/Game2Resettin
+gCircle.scala scala/Part5Application/Game3FruitPicking.scala sc
+ala/Part5Application/Ex1GameApp.scala scala/Part5Application/Ga
+me.scala scala/Part5Application/Game1GrowingCircle.scala scala/
+Part5Application/Game2ResettingCircle.scala scala/Part5Applicat
+ion/Game3FruitPicking.scala scala/Part5Application/solution/Gam
+eApp.scala scala/Part5Application/solution/GameAppWithError.sca
+la scala/Part5Application/solution/GameAppWithErrorAndLogging.s
+cala scala/Part5Application/solution/GameAppWithErrorAndLogging
+AndMetrics.scala --interactive
+λ> scala-cli run project.scala scala/Part5Application/*.scala s
+cala/Part5Application/**/*.scala --interactive
+Found several main classes. Which would you like to run?
+[0] Example93
+[1] Game1GrowingCircle
+[2] Game3FruitPicking
+^C
+λ> scala-cli run project.scala scala/Part5Application/*.scala s
+cala/Part5Application/**/*.scala --interactive
+Compiling project (Scala 3.7.0, JVM (21))
+Compiled project (Scala 3.7.0, JVM (21))
+Found several main classes. Which would you like to run?
+[0] Game1GrowingCircle
+[1] Game2ResettingCircle
+[2] Game3FruitPicking
+2
+pick
+pick
+pick
+pick
+pick
+pick
+pick
+^C^C^C^C^C^C^C^C^C
+
+
+^C^C^C^C^C^C^C^C^C^C^C^C^C^C^C^C^C^CKilled: 9
+λ> scala-cli run project.scala scala/Part5Application/*.scala s
+cala/Part5Application/**/*.scala --interactive
+Found several main classes. Which would you like to run?
+[0] Game1GrowingCircle
+[1] Game2ResettingCircle
+[2] Game3FruitPicking
+2
+pick
+pick
+pick
+pick
+pick
+pick
+pick
+pick
+pick
+pick
+pick
+pick
+pick
+pick
+pick
+pick
+pick
+λ> scala-cli run project.scala scala/Part5Application/*.scala s
+cala/Part5Application/**/*.scala --interactive
+Compiling project (Scala 3.7.0, JVM (21))
+Compiled project (Scala 3.7.0, JVM (21))
+Found several main classes. Which would you like to run?
+[0] Game1GrowingCircle
+[1] Game2ResettingCircle
+[2] Game3FruitPicking
+0
+^C^C^C^C^KpKilled: 9
+λ> scala-cli run project.scala scala/Part5Application/*.scala s
+cala/Part5Application/**/*.scala --interactive
+Compiling project (Scala 3.7.0, JVM (21))
+Compiled project (Scala 3.7.0, JVM (21))
+Found several main classes. Which would you like to run?
+[0] Game1GrowingCircle
+[1] Game2ResettingCircle
+[2] Game3FruitPicking
+0
+^C^C^C
+
+Killed: 9
+λ>
+λ>
+λ> scala-cli run project.scala scala/Part5Application/*.scala s
+cala/Part5Application/**/*.scala --interactive
+Compiling project (Scala 3.7.0, JVM (21))
+Compiled project (Scala 3.7.0, JVM (21))
+Found several main classes. Which would you like to run?
+[0] Game1GrowingCircle
+[1] Game2ResettingCircle
+[2] Game3FruitPicking
+1
+reset
+reset
+chocolate
+reset
+reset
+reset
+^X^X^C^C^C^C^C^C^C^CKilled: 9

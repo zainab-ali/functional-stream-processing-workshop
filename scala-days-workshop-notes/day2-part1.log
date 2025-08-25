@@ -1878,20 +1878,3 @@ java.util.concurrent.TimeoutException: 10 seconds
   at unsafeRunSync @ rs$line$4$.<clinit>(rs$line$4:2)
   at forceR$extension @ fs2.Stream$NestedStreamOps$.runInner$2
 $$anonfun$1$$anonfun$2$$anonfun$3(Stream.scala:4616)
-
-scala> exit
--- [E006] Not Found Error: -----------------------------------
-------------------
-1 |exit
-  |^^^^
-  |Not found: exit - did you mean Unit? or perhaps text or wai
-t?
-  |
-  | longer explanation available when compiling with `-explain
-`
-1 error found
-
-scala> :q
-λ> tmux capture-pane -pS - > scaladays-workshop-notes/day2-par
-t1.log
-

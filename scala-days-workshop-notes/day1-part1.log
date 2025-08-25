@@ -1,16 +1,3 @@
-
-
-zainab@beagle:~/dev/zainab/blog/ > cd ../../zainab-ali/functio
-nal-stream-processing-workshop
-zainab@beagle:~/dev/zainab-ali/functional-stream-processing-wo
-rkshop/ > nix develop
-warning: Git tree '/Users/zainab/dev/zainab-ali/functional-str
-eam-processing-workshop' is dirty
-λ> pwd
-/Users/zainab/dev/zainab-ali/functional-stream-processing-work
-shop
-λ> scala-cli
-
 ^Cλ> scala-cli compile project.scala scala/Part1Introduction/C
 ode1WhatAreStreams.sc
 Compiling project (Scala 3.7.0, JVM (21))
@@ -352,51 +339,3 @@ ExceptionHandler in thread "RMI TCP Connection(idle)"
 Exception in thread "RMI TCP Connection(idle)" java.lang.OutOf
 MemoryError: Java heap space
 java.lang.OutOfMemoryError: Java heap space
-
-scala>
-
-
-
-
-
-
-scala> exit
--- [E006] Not Found Error: -----------------------------------
-------------------
-1 |exit
-  |^^^^
-  |Not found: exit - did you mean Unit? or perhaps text or wai
-t?
-  |
-  | longer explanation available when compiling with `-explain
-`
-1 error found
-
-
-scala> exi
--- [E006] Not Found Error: -----------------------------------
-------------------
-1 |exi
-  |^^^
-  |Not found: exi
-  |
-  | longer explanation available when compiling with `-explain
-`
-1 error found
-
-
-scala> quit
--- [E006] Not Found Error: -----------------------------------
-------------------
-1 |quit
-  |^^^^
-  |Not found: quit - did you mean Unit? or perhaps wait?
-  |
-  | longer explanation available when compiling with `-explain
-`
-1 error found
-
-
-scala> :q
-λ> tmux capture-pane -pS -1000000 > part-1.log
-
