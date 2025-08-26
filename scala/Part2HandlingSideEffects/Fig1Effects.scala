@@ -3,7 +3,8 @@ import cats.effect.*
 import aquascape.*
 
 object Fig1Effects extends WorkshopAquascapeApp {
-  def greeting(name: String): IO[String] = IO.println(s"Hi $name!").as(s"Hi $name!")
+  def greeting(name: String): IO[String] =
+    IO.println(s"Hi $name!").as(s"Hi $name!")
 
   def stream(using Scape[IO]) = {
     Stream("Mao", "Owl")
