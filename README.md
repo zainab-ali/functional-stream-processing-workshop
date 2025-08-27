@@ -18,12 +18,9 @@ Use `scala` version 3.5+.
    ```
  - Open the project in your favourite IDE.
 
-### If you have problems during the workshop at Scala Days 2025
+### If you have problems with your IDE
 
-Depending on how your IDE is setup, it might not recognize this as a
-Scala project. To get up and running quickly, you can checkout the
-`scala-days-sbt` branch and open an SBT project from the `sbt`
-directory.
+Upgrade to your latest IDE version. Old versions of IntelliJ are known to have problems.
 
 ## Opening a REPL
 
