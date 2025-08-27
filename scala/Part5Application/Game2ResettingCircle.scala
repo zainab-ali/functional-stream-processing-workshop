@@ -9,7 +9,7 @@ import doodle.interact.*
 import doodle.interact.syntax.all.*
 import doodle.core.*
 
-object Example93 extends GameApp[Int, Unit] {
+object Game2ResettingCircle extends GameApp[Int, Unit] {
   def game: IO[Game[Int, Unit]] = IO(
     new Game[Int, Unit] {
       def init: Int = 1
