@@ -15,14 +15,17 @@ class Ex1WhatAreStreamsSolutions extends CatsEffectSuite {
     assertEquals(result, List(6, 7, 8))
   }
 
-  test("get the first three odd numbers") {
-    val result: List[Int] = numbers.filter(n => n % 2 == 1).take(3).toList
+  test("get odd numbers less than six") {
+    val result: List[Int] = numbers
+      .filter(n => n % 2 == 1)
+      .takeWhile(_ < 6)
+      .toList
     assertEquals(result, List(1, 3, 5))
   }
 
   test("get the 1000th number") {
-    val result: Int = numbers.drop(1000).head.compile.last.get
-    assertEquals(result, 1000)
+    val result: Int = numbers.drop(999).head.compile.last.get
+    assertEquals(result, 999)
   }
 
   test("get the sum of the first 10 numbers") {

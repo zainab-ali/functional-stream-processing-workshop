@@ -22,7 +22,7 @@ class Ex1WhatAreStreams extends CatsEffectSuite {
 
   test("get the 1000th number") {
     val result: Int = ???
-    assertEquals(result, 1000)
+    assertEquals(result, 999)
   }
 
   test("get the sum of the first 10 numbers") {
