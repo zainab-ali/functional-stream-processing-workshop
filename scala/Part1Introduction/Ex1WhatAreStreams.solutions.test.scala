@@ -15,7 +15,7 @@ class Ex1WhatAreStreamsSolutions extends CatsEffectSuite {
     assertEquals(result, List(6, 7, 8))
   }
 
-  test("get odd numbers less than six".only) {
+  test("get odd numbers less than six") {
     val result: List[Int] = numbers
       .filter(n => n % 2 == 1)
       .takeWhile(_ < 6)
