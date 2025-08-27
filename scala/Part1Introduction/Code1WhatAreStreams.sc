@@ -36,7 +36,7 @@ def countNumbersRec(until: Int, predicate: Int => Boolean): Int = {
 
 /* A stream is composable, testable and can be reasoned through */
 def countNumbersStream(until: Int, predicate: Int => Boolean): Long =
-  Stream.range(0, until).filter(predicate).compile.count.toInt
+  Stream.range(0, until).filter(predicate).compile.count
 
 /* Streams vs Lists */
 
