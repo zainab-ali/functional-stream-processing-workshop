@@ -12,7 +12,7 @@ object Fig5Chunks extends WorkshopAquascapeApp {
       .take(2)
       .stage("take(2)")
       .compile
-      .toList
+      .count
       .compileStage("compile.count")
       .void
   }
