@@ -1,22 +1,29 @@
 import fs2.*
+import fs2.io.file.*
 import cats.effect.*
 import aquascape.*
 import cats.syntax.all.*
 
 object Fig3HandleErrorWith extends WorkshopAquascapeApp {
-  def raiseIfTwo(x: Int): IO[Int] =
-    IO.raiseError(new Error("!")).whenA(x == 2).as(x)
+  def getContentsFromDisk(title: String): Stream[IO, String] =
+    // Stub out NoSuchFileException
+    Stream.raiseError[IO](new Error("NoSuchFileException"))
+
+  def getContentsFromApi(title: String): Stream[IO, String] =
+    // Stub out API call
+    Stream("In", "Chancery", "London")
 
   def stream(using Scape[IO]) = {
-    Stream(1, 2, 3)
-      .stage("Stream(1, 2, 3)")
-      .evalMap(x => raiseIfTwo(x).trace())
-      .stage("evalMap(raiseIfTwo)")
-      .handleErrorWith(_ => Stream(42).stage("Stream(42)"))
-      .stage("handleErrorWith(…)")
+    getContentsFromDisk("Bleak House")
+      .stage("disk")
+      .handleErrorWith { _ =>
+        getContentsFromApi("Bleak House")
+      }
+      .stage("handleErrorWith(_ => api)")
+      .take(3)
       .compile
-      .toList
-      .compileStage("compile.toList")
+      .count
+      .compileStage("compile.count")
       .void
   }
 }
