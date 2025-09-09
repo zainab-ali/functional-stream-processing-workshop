@@ -4,17 +4,31 @@ import aquascape.*
 import cats.syntax.all.*
 
 object Fig2Errors extends WorkshopAquascapeApp {
-  def raiseIfTwo(x: Int): IO[Int] =
-    IO.raiseError(new Error("!")).whenA(x == 2).as(x)
+
+  case class Book(title: String, author: String, wordCount: Int)
+
+  given cats.Show[Book] = _.title
+  val books = Stream(
+    Book("Emma", "Austen", 78500),
+    Book("Little Dorrit", "Dickens", -2),
+    Book("Hard Times", "Dickens", 110000)
+  )
+
+  def validateBook(book: Book): IO[Book] =
+    IO.raiseWhen(book.wordCount < 0)(CountIsNegative(book)).as(book)
+
+  case class CountIsNegative(book: Book)
+      extends Throwable(s"${book.title} has ${book.wordCount} words")
 
   def stream(using Scape[IO]) = {
-    Stream(1, 2, 3)
-      .stage("Stream(1, 2, 3)")
-      .evalTap(x => raiseIfTwo(x).trace())
-      .stage("evalTap(raiseIfTwo)")
+    books
+      .stage("books")
+      .evalMap(validateBook)
+      .stage("evalMap(validateBook)")
+      .map(_.wordCount)
       .compile
-      .count
-      .compileStage("compile.count")
+      .foldMonoid
+      .compileStage("compile.foldMonoid")
       .attempt
       .void
   }
