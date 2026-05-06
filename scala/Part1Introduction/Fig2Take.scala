@@ -11,8 +11,8 @@ object Fig2Take extends WorkshopAquascapeApp {
       .drop(1)
       .stage("drop(1)")
       .compile
-      .toList
-      .compileStage("compile.toList")
+      .count
+      .compileStage("compile.count")
       .void
   }
 }
