@@ -15,7 +15,7 @@ class Ex1WhatAreStreamsSolutions extends CatsEffectSuite {
     assertEquals(result, List(6, 7, 8))
   }
 
-  test("get odd numbers less than six") {
+  test("get odd numbers before the number 6") {
     val result: List[Int] = numbers
       .filter(n => n % 2 == 1)
       .takeWhile(_ < 6)
@@ -28,7 +28,9 @@ class Ex1WhatAreStreamsSolutions extends CatsEffectSuite {
     assertEquals(result, 999)
   }
 
-  test("get the sum of the first 10 numbers") {
+  test("get the sum of the first ten numbers") {
+    // `foldMonoid` sums all the numbers in a stream.
+    // Note that there are many other ways to solve this exercise.
     val result = numbers.take(10).compile.foldMonoid
     assertEquals(result, 45)
   }

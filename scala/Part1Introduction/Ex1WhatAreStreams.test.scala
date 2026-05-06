@@ -15,7 +15,7 @@ class Ex1WhatAreStreams extends CatsEffectSuite {
     assertEquals(result, List(6, 7, 8))
   }
 
-  test("get odd numbers less than six") {
+  test("get odd numbers before the number 6") {
     val result: List[Int] = ???
     assertEquals(result, List(1, 3, 5))
   }
@@ -25,7 +25,7 @@ class Ex1WhatAreStreams extends CatsEffectSuite {
     assertEquals(result, 999)
   }
 
-  test("get the sum of the first 10 numbers") {
+  test("get the sum of the first ten numbers") {
     val result = ???
     assertEquals(result, 45)
   }
