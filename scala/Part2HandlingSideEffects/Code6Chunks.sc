@@ -18,7 +18,7 @@ import fs2.io.file.*
 Files[IO]
   .readAll(
     Path("data/little-dorrit.txt"),
-    chunkSize = 64 * 1024,
+    chunkSize = 65536, // 64 * 1024
     flags = Flags.Read
   )
   .debugChunks(formatter = chunk => s"The chunk size is ${chunk.size}")
@@ -34,6 +34,7 @@ Stream.range(0, 3).debugChunks().compile.count
 Stream
   .range(0, 3)
   .chunkMin(2)
+  .unchunks
   .debugChunks()
   .compile
   .count
