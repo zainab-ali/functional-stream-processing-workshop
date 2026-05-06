@@ -49,6 +49,9 @@ val numbersListCount = numbersList.size
 /* A stream is a program that is "compiled" into a value. For example, we can compile it into the count of elements. */
 val numbersCount = numbers.compile.count
 
+/* We can  the values created by the stream using the debug operator */
+numbers.debug().compile.count
+
 /* We can create a stream backed by a list with the emits function  */
 val numbersFromList = Stream.emits(List.range(0, Int.MaxValue))
 
