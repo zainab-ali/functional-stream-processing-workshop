@@ -10,7 +10,7 @@ class Ex3CombiningSolutions extends CatsEffectSuite {
 
   val food = Stream("Tuna", "Duck", "Chicken")
 
-  test("append") {
+  test("kittens and then food") {
     val result: Stream[Pure, String] = kittens ++ food
     assertEquals(
       result.compile.toList,
@@ -18,7 +18,7 @@ class Ex3CombiningSolutions extends CatsEffectSuite {
     )
   }
 
-  test("zip") {
+  test("kittens tupled with food") {
     val result: Stream[Pure, (String, String)] = kittens.zip(food)
     assertEquals(
       result.compile.toList,
@@ -26,12 +26,12 @@ class Ex3CombiningSolutions extends CatsEffectSuite {
     )
   }
 
-  test("interleave") {
+  test("a kitten, some food, another kitten") {
     val result: Stream[Pure, String] = kittens.interleave(food)
     assertEquals(result.compile.toList, List("Mao", "Tuna", "Popcorn", "Duck"))
   }
 
-  test("flatMap") {
+  test("kittens paired with all foods") {
     val result: Stream[Pure, String] = kittens.flatMap { kitten =>
       food.map { foodItem => s"$kitten-$foodItem" }
     }
