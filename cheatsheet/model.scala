@@ -261,6 +261,7 @@ object CheatSheet {
     "s.mergeHaltBoth(that)",
     "s.mergeHaltL(that)",
     "s.mergeHaltR(that)",
+    "s.mergeAndAwaitDownstream(that)",
     "s.interleaveOrdered(that)",
     "s.noneTerminate",
     "s.onFinalizeWeak(f)",
