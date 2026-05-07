@@ -54,6 +54,8 @@ val emma = Book("Emma", "Austen", 78500)
 validateBook2(emma)
   .unsafeRunSync()
 
+validateBook2(emma).attempt
+
 validateBook2(emma).attempt.map(_.toOption)
 
 validateBook2(emma).attempt
