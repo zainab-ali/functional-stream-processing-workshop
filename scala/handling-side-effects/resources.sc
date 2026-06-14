@@ -1,8 +1,9 @@
-import fs2.*
-import cats.effect.IO
-import cats.effect.unsafe.implicits.*
-import scala.util.control.NoStackTrace
+import cats.effect.unsafe.implicits.global
 
+import cats.effect.IO
+import fs2._
+import cats.syntax.all._
+import scala.util.control.NoStackTrace
 object BOOM extends Throwable("BOOM!") with NoStackTrace
 
 case class Tap(temp: String)
@@ -16,11 +17,13 @@ def closeTap(tap: Tap): IO[Unit] =
 def drawWater(tap: Tap): IO[Unit] =
   IO.println(s"Drawing water from ${tap.temp} tap.")
 
-openTap("hot").flatMap { tap =>
-  drawWater(tap).attempt
-    .flatTap(_ => closeTap(tap))
-    .rethrow
-}
+openTap("hot")
+  .flatMap { tap =>
+    drawWater(tap).attempt
+      .flatTap(_ => closeTap(tap))
+      .rethrow
+  }
+  .unsafeRunSync()
 
 val tapStream = Stream.bracket(openTap("hot"))(closeTap)
 
@@ -54,3 +57,4 @@ tapStream
   .evalMap(_ => IO.raiseError(BOOM))
   .compile
   .drain
+  .unsafeRunSync()

@@ -1,12 +1,15 @@
-import fs2.*
-import scala.concurrent.duration.*
-import cats.effect.IO
-import cats.effect.kernel.Clock
 import cats.effect.unsafe.implicits.global
+
+import fs2._
+import cats.effect.IO
+
+import scala.concurrent.duration.*
+import cats.effect.kernel.Clock
 
 final case class Task(name: String, time: Int)
 
 val time = Stream.eval(Clock[IO].realTime)
+
 def printProcessed(startTime: FiniteDuration, task: Task): IO[Unit] =
   Clock[IO].realTime.flatMap(currentTime =>
     IO.println(
@@ -21,16 +24,16 @@ def printStarting(startTime: FiniteDuration, task: Task): IO[Unit] =
     )
   )
 
-def process(startTime: FiniteDuration)(task: Task): IO[Task] =
-  printStarting(startTime, task).bracket[Task](_ =>
-    IO.sleep(task.time.seconds).as(task)
-  )(_ => printProcessed(startTime, task))
+def eval(startTime: FiniteDuration)(task: Task): IO[Task] =
+  printStarting(startTime, task) >> IO.sleep(
+    task.time.seconds
+  ) >> printProcessed(startTime, task).as(task)
 
 val tasks =
   Stream(Task("a", 5), Task("b", 4), Task("c", 3), Task("d", 2), Task("e", 1))
 
 time
-  .flatMap { startTime => tasks.evalMap(process(startTime)) }
+  .flatMap { startTime => tasks.evalMap(eval(startTime)) }
   .compile
   .drain
   .unsafeRunSync()
@@ -38,7 +41,7 @@ time
 time
   .flatMap { startTime =>
     tasks
-      .parEvalMap(3)(process(startTime))
+      .parEvalMap(3)(eval(startTime))
   }
   .compile
   .toList
@@ -47,30 +50,31 @@ time
 time
   .flatMap { startTime =>
     tasks
-      .parEvalMapUnordered(3)(process(startTime))
+      .parEvalMapUnordered(3)(eval(startTime))
   }
   .compile
   .toList
   .unsafeRunSync()
 
-def processConstantTime(startTime: FiniteDuration)(task: Task): IO[Task] =
-  printStarting(startTime, task).bracket[Task](_ =>
-    IO.sleep(2.seconds).as(task)
-  )(_ => printProcessed(startTime, task))
+def sleepFixed(startTime: FiniteDuration)(task: Task): IO[Task] =
+  printStarting(startTime, task) >> IO.sleep(1.second) >> printProcessed(
+    startTime,
+    task
+  ).as(task)
 
 time
   .flatMap { startTime =>
     tasks
-      .parEvalMap(3)(processConstantTime(startTime))
+      .parEvalMap(3)(sleepFixed(startTime))
   }
   .compile
-  .toList
+  .drain
   .unsafeRunSync()
 
 time
   .flatMap { startTime =>
     tasks
-      .parEvalMapUnordered(3)(process(startTime))
+      .parEvalMapUnordered(3)(eval(startTime))
       .take(3)
   }
   .compile
@@ -79,10 +83,10 @@ time
 
 val tasksAAndC = Stream(Task("a", 5), Task("c", 3))
 time
-  .flatMap { start =>
+  .flatMap { startTime =>
     tasksAAndC
-      .parEvalMapUnordered(3)(process(start))
-      .evalMap(processConstantTime(start))
+      .parEvalMapUnordered(3)(eval(startTime))
+      .evalMap(sleepFixed(startTime))
   }
   .compile
   .drain

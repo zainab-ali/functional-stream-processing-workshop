@@ -1,17 +1,12 @@
-import fs2.*
-import fs2.concurrent.*
-import cats.effect.*
 import cats.effect.unsafe.implicits.global
+
+import fs2.*
+import cats.effect.*
 import scala.concurrent.duration.*
 
+import fs2.concurrent.*
+
 Channel.unbounded[IO, String]
-
-Stream
-  .iterate(0)(_ + 1)
-  .evalMap(i => IO.println(s"Producing $i"))
-  .metered(1.second)
-
-Channel.unbounded[IO, Int].unsafeRunSync()
 
 Channel
   .unbounded[IO, Int]
@@ -24,7 +19,8 @@ Channel
     val consumer = channel.stream.evalMap(i => IO.println(s"Consuming $i"))
     consumer.concurrently(producer).compile.drain
   }
-  .timeout(3.second)
+  .timeout(3.seconds)
+  .attempt
   .unsafeRunSync()
 
 Channel
@@ -40,7 +36,8 @@ Channel
       .metered(2.seconds)
     consumer.concurrently(producer).compile.drain
   }
-  .timeout(10.second)
+  .timeout(10.seconds)
+  .attempt
   .unsafeRunSync()
 
 Channel
@@ -53,39 +50,8 @@ Channel
       .compile
       .drain
   }
-  .timeout(10.second)
-  .unsafeRunSync()
-
-Channel
-  .bounded[IO, Int](2)
-  .flatMap { channel =>
-    val producer = Stream
-      .iterate(0)(_ + 1)
-      .evalTap(i => IO.println(s"Producing $i"))
-      .metered(1.second)
-      .through(channel.sendAll)
-    val consumer = channel.stream
-      .evalMap(i => IO.println(s"Consuming $i"))
-      .metered(2.seconds)
-    consumer.concurrently(producer).compile.drain
-  }
-  .timeout(20.second)
-  .unsafeRunSync()
-
-Channel
-  .bounded[IO, Int](2)
-  .flatMap { channel =>
-    val producer = Stream
-      .iterate(0)(_ + 1)
-      .evalTap(i => IO.println(s"Producing $i"))
-      .metered(1.second)
-      .through(channel.sendAll)
-    val consumer = channel.stream
-      .evalMap(i => IO.println(s"Consuming $i"))
-      .metered(2.seconds)
-    consumer.concurrently(producer).compile.drain
-  }
-  .timeout(20.second)
+  .timeout(10.seconds)
+  .attempt
   .unsafeRunSync()
 
 Channel
@@ -103,4 +69,5 @@ Channel
     consumer.concurrently(producer).compile.drain
   }
   .timeout(20.second)
+  .attempt
   .unsafeRunSync()
