@@ -1,0 +1,65 @@
+body {
+    padding: 10px 20px;
+}
+
+div.sheet {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+}
+div.section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+    margin: 10px;
+}
+
+body > h1 {
+    font-family: Source Sans Pro;
+    font-weight: normal;
+    font-variant: all-small-caps;
+    margin-left: 10px;
+    padding-left: 10px;
+    padding-bottom: 10px;
+}
+div.section h1 {
+    font-family: Source Sans Pro;
+    font-weight: normal;
+    font-variant: all-small-caps;
+    margin: 0;
+}
+div.section ol {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+div.section.double ol {
+    columns: 2;
+    -webkit-columns: 2;
+    -moz-columns: 2;
+}
+
+/* Colours */
+/* https://paletton.com/#uid=34b0u0kllllaFw0g0qFqFg0w0aF */
+body {
+    background-color: #FFE1AA;
+}
+
+body > h1 {
+    background-color: #241858;
+    color: #FFE1AA;
+}
+div.section h1 {
+    color: #FFE1AA;
+}
+div.section {
+    background-color: #3E3175;
+    color: #FFE1AA;
+    border-color: #D4AF6A;
+    font-size: 16px;
+}
+div.section ol li:nth-child(odd) {
+    background-color: #241858;
+    color: #FFE1AA;
+}

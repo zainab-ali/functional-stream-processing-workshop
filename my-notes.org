@@ -1,0 +1,4 @@
+I can capture a pane with:
+#+begin_example
+tmux capture-pane -pS -1000000 > file.out
+#+end_example
